@@ -3040,7 +3040,8 @@ class LinkedinPy:
               connection_code,
               city_code,
               college_code,
-              max_page=10,
+              random_start=True,
+              max_pages=10,
               max_connects=30,
               sleep_delay=6000):
         """ search linkedin and connect from a given profile """
@@ -3061,7 +3062,12 @@ class LinkedinPy:
         search_url = search_url + "&keywords" + query
         search_url = search_url + "&origin=" + "FACETED_SEARCH"
 
-        for page_no in list(range(1, 1 + max_page)):
+        if random_start:
+            st = random.randint(1, 10)
+        else:
+            st = 1
+
+        for page_no in list(range(st, st + max_pages)):
             try:
                 search_url = search_url + "&page=" + str(page_no)
                 web_address_navigator(self.browser, search_url, Settings)
@@ -3108,13 +3114,18 @@ class LinkedinPy:
                                 print("Popup not found")
                         except Exception as e:
                             print("Popup not found, Failed with:", e)
-                        # update server calls
-                        update_activity(Settings, 'connects')
+
+                        try:
+                            # update server calls
+                            update_activity(Settings, 'connects')
+                        except Exception as e:
+                            print(e)
+
+                        print("Connects sent in this iteration: {}".format(connects))
                         delay_random = random.randint(
                                     ceil(sleep_delay * 0.85),
                                     ceil(sleep_delay * 1.14))
                         sleep(delay_random)
-                        print("connects sent in this iteration: {}".format(connects))
                         if connects >= max_connects:
                             print("max_connects({}) for this iteration reached , Returning...".format(max_connects))
                             return
