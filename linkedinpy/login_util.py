@@ -175,11 +175,11 @@ def login_user(browser,
     time.sleep(1)
 
     # changes linkedin website language to english to use english xpaths
-    if switch_language:
-        links = browser.find_elements_by_xpath('//*[@id="pageFooter"]/ul/li')
-        for link in links:
-            if link.get_attribute('title') == "English (UK)":
-                click_element(browser, Settings, link)
+    # if switch_language:
+    #     links = browser.find_elements_by_xpath('//*[@id="pageFooter"]/ul/li')
+    #     for link in links:
+    #         if link.get_attribute('title') == "English (UK)":
+    #             click_element(browser, Settings, link)
 
     # web_address_navigator(browser, ig_homepage, Settings)
     # reload_webpage(browser, Settings)
@@ -195,21 +195,21 @@ def login_user(browser,
     #                                 logfolder,
     #                                 True)
 
-    try:
-        profile_pic = browser.find_element_by_xpath('//*[@id="nav-settings__dropdown-trigger"]/img')
+    # try:
+    #     profile_pic = browser.find_element_by_xpath('//*[@id="nav-settings__dropdown-trigger"]/img')
 
-        if profile_pic:
-            login_state = True
-        else:
-            login_state = False
-    except Exception as e:
-        login_state = False
+    #     if profile_pic:
+    #         login_state = True
+    #     else:
+    #         login_state = False
+    # except Exception as e:
+    #     login_state = False
 
-    print('login_state:', login_state)
+    # print('login_state:', login_state)
 
-    if login_state is True:
-        # dismiss_notification_offer(browser, logger)
-        return True
+    # if login_state is True:
+    #     # dismiss_notification_offer(browser, logger)
+    #     return True
 
     # if user is still not logged in, then there is an issue with the cookie
     # so go create a new cookie..
@@ -248,8 +248,7 @@ def login_user(browser,
 
     input_username = browser.find_element_by_xpath(input_username_XP)
 
-    print('moving to input_username')
-    print('entering input_username')
+    print('Entering username')
     (ActionChains(browser)
      .move_to_element(input_username)
      .click()
@@ -267,7 +266,7 @@ def login_user(browser,
     if not isinstance(password, str):
         password = str(password)
 
-    print('entering input_password')
+    print('Entering password')
     (ActionChains(browser)
      .move_to_element(input_password[0])
      .click()
@@ -280,7 +279,7 @@ def login_user(browser,
 
     sleep(1)
 
-    print('submitting login_button')
+    print('Submitting login_button')
     login_button = browser.find_element_by_xpath('//*[@type="submit"]')
 
     (ActionChains(browser)

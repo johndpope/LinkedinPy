@@ -30,6 +30,8 @@ from socialcommons.print_log_writer import log_following_num
 
 from socialcommons.time_util import sleep
 from socialcommons.time_util import set_sleep_percentage
+
+from socialcommons.util import update_activity
 # from socialcommons.util import get_active_users
 from socialcommons.util import validate_userid
 from socialcommons.util import web_address_navigator
@@ -45,15 +47,17 @@ from socialcommons.util import parse_cli_args
 # from .unfollow_util  import unfollow_user
 # from .unfollow_util  import follow_user
 # from .unfollow_util  import follow_restriction
-# from .unfollow_util  import dump_follow_restriction
+from .unfollow_util  import dump_follow_restriction
 # from .unfollow_util  import set_automated_followed_pool
 # from .unfollow_util  import get_follow_requests
+
 # from .relationship_tools import get_following
 from .relationship_tools import get_followers
 # from .relationship_tools import get_unfollowers
 # from .relationship_tools import get_nonfollowers
 # from .relationship_tools import get_fans
 # from .relationship_tools import get_mutual_following
+
 from socialcommons.database_engine import get_database
 from socialcommons.text_analytics import text_analysis
 from socialcommons.text_analytics import yandex_supported_languages
@@ -68,7 +72,6 @@ from socialcommons.quota_supervisor import quota_supervisor
 from selenium.common.exceptions import NoSuchElementException
 from socialcommons.exceptions import SocialPyError
 from .settings import Settings
-
 
 class LinkedinPy:
     """Class to be instantiated to use the script"""
@@ -3036,18 +3039,32 @@ class LinkedinPy:
               query,
               connection_code,
               city_code,
+              college_code,
               max_page=10,
-              sleep_delay=600):
+              max_connects=30,
+              sleep_delay=6000):
         """ search linkedin and connect from a given profile """
 
         if quota_supervisor(Settings, "connects") == "jump":
             return #False, "jumped"
 
-        base_url = "https://www.linkedin.com/search/results/people/?"
+        print("Searching for: ", query, connection_code, city_code, college_code)
+        connects = 0
+        search_url = "https://www.linkedin.com/search/results/people/?"
+        if connection_code:
+            search_url = search_url + "&facetNetwork=" + connection_code
+        if city_code:
+            search_url = search_url + "&facetGeoRegion=" + city_code
+        if college_code:
+            search_url = search_url + "&facetSchool=" + college_code
+
+        search_url = search_url + "&keywords" + query
+        search_url = search_url + "&origin=" + "FACETED_SEARCH"
+
         for page_no in list(range(1, 1 + max_page)):
             try:
-                net_search_url = base_url + "facetGeoRegion=" + city_code + "&facetNetwork=" + connection_code + "&keywords=" + query + "&origin=FACETED_SEARCH&page=" + str(page_no)
-                web_address_navigator(self.browser, net_search_url, Settings)
+                search_url = search_url + "&page=" + str(page_no)
+                web_address_navigator(self.browser, search_url, Settings)
                 print("Starting page:", page_no)
 
                 for jc in range(1, 10):
@@ -3083,6 +3100,7 @@ class LinkedinPy:
                                      .click()
                                      .perform())
                                     print("Clicked", send_button.text)
+                                    connects = connects + 1
                                     sleep(2)
                                 except Exception as e:
                                     print("send_button not found, Failed with:", e)
@@ -3096,6 +3114,10 @@ class LinkedinPy:
                                     ceil(sleep_delay * 0.85),
                                     ceil(sleep_delay * 1.14))
                         sleep(delay_random)
+                        print("connects sent in this iteration: {}".format(connects))
+                        if connects >= max_connects:
+                            print("max_connects({}) for this iteration reached , Returning...".format(max_connects))
+                            return
                     except Exception as e:
                         print(e)
             except Exception as e:
