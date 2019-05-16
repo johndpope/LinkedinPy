@@ -52,7 +52,7 @@ from .unfollow_util  import dump_follow_restriction
 # from .unfollow_util  import get_follow_requests
 
 # from .relationship_tools import get_following
-from .relationship_tools import get_followers
+# from .relationship_tools import get_followers 
 # from .relationship_tools import get_unfollowers
 # from .relationship_tools import get_nonfollowers
 # from .relationship_tools import get_fans
