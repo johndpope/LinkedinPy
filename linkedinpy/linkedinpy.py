@@ -3059,7 +3059,7 @@ class LinkedinPy:
         if college_code:
             search_url = search_url + "&facetSchool=" + college_code
 
-        search_url = search_url + "&keywords" + query
+        search_url = search_url + "&keywords=" + query
         search_url = search_url + "&origin=" + "FACETED_SEARCH"
 
         if random_start:
