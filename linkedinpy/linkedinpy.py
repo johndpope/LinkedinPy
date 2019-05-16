@@ -3043,7 +3043,7 @@ class LinkedinPy:
               random_start=True,
               max_pages=10,
               max_connects=30,
-              sleep_delay=6000):
+              sleep_delay=6):
         """ search linkedin and connect from a given profile """
 
         if quota_supervisor(Settings, "connects") == "jump":
@@ -3063,7 +3063,16 @@ class LinkedinPy:
         search_url = search_url + "&origin=" + "FACETED_SEARCH"
 
         if random_start:
-            st = random.randint(1, 10)
+            trial = 0
+            while True and trial < 10:
+                st = random.randint(1, 10)
+                search_url = search_url + "&page=" + str(st)
+                web_address_navigator(self.browser, search_url, Settings)
+                print("Testing page:", st)
+                result_items = self.browser.find_elements_by_css_selector("div.search-result__wrapper")
+                if len(result_items) > 0:
+                    break
+                trial = trial + 1
         else:
             st = 1
 
