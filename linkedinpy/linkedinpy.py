@@ -3100,14 +3100,26 @@ class LinkedinPy:
                             modal = self.browser.find_element_by_css_selector("div.modal-wormhole-content > div")
                             if modal:
                                 try:
-                                    send_button = modal.find_element_by_xpath("//div[1]/div/section/div/div[2]/button[text()='Send now']")
-                                    (ActionChains(self.browser)
-                                     .move_to_element(send_button)
-                                     .click()
-                                     .perform())
-                                    print("Clicked", send_button.text)
-                                    connects = connects + 1
-                                    sleep(2)
+                                    send_button = modal.find_element_by_xpath("//div[1]/div/section/div/div[2]/button[text()='Send now']")                                    
+                                    if send_button.is_enabled():
+                                        (ActionChains(self.browser)
+                                         .move_to_element(send_button)
+                                         .click()
+                                         .perform())
+                                        print("Clicked", send_button.text)
+                                        connects = connects + 1
+                                        sleep(2)
+                                    else:
+                                        try:
+                                            close_button = modal.find_element_by_xpath("//div[1]/div/section/div/header/button")
+                                            (ActionChains(self.browser)
+                                             .move_to_element(close_button)
+                                             .click()
+                                             .perform())
+                                            print(send_button.text, "disabled, clicked close")
+                                            sleep(2)
+                                        except Exception as e:
+                                            print("close_button not found, Failed with:", e)
                                 except Exception as e:
                                     print("send_button not found, Failed with:", e)
                             else:
@@ -3981,7 +3993,7 @@ class LinkedinPy:
     def end(self):
         """Closes the current session"""
 
-        FACEBOOKPY_IS_RUNNING = False
+        IS_RUNNING = False
         close_browser(self.browser, False, self.logger)
 
         with interruption_handler():
