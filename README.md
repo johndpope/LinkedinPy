@@ -1,4 +1,4 @@
-# GithubPy
+# LinkedinPy
 
 
 ## Installation:
