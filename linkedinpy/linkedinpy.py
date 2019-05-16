@@ -3156,6 +3156,115 @@ class LinkedinPy:
                 print(e)
             print("============Next Page==============")
 
+    def endorse(self,
+              profile_link,
+              sleep_delay):
+        try:
+            web_address_navigator(self.browser, profile_link, Settings)
+
+            for jc in range(1, 10):
+                sleep(1)
+                self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight*" + str(jc) + "/10);")
+
+            skills_pane = self.browser.find_element_by_css_selector("div.profile-detail > div.pv-deferred-area > div > section.pv-profile-section.pv-skill-categories-section")
+            if (skills_pane.text.split('\n')[0] == 'Skills & Endorsements'):
+                try:
+                    first_skill_button_icon = self.browser.find_element_by_css_selector("div.profile-detail > div.pv-deferred-area > div > section.pv-profile-section.pv-skill-categories-section > ol > li > div > div > div > button > li-icon")
+                    button_type = first_skill_button_icon.get_attribute("type")
+                    if button_type=='plus-icon':
+                        first_skill_button = self.browser.find_element_by_css_selector("div.profile-detail > div.pv-deferred-area > div > section.pv-profile-section.pv-skill-categories-section > ol > li > div > div > div > button")
+                        self.browser.execute_script("var evt = document.createEvent('MouseEvents');" + "evt.initMouseEvent('click',true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);" + "arguments[0].dispatchEvent(evt);", first_skill_button)
+                        first_skill_title = self.browser.find_element_by_css_selector("div.profile-detail > div.pv-deferred-area > div > section.pv-profile-section.pv-skill-categories-section > ol > li > div > div > p > a > span")
+                        print(first_skill_title.text, "clicked")
+                        delay_random = random.randint(
+                                    ceil(sleep_delay * 0.85),
+                                    ceil(sleep_delay * 1.14))
+                        sleep(delay_random)
+                    else:
+                        print('button_type already', button_type)
+                except Exception as e:
+                    print(e)
+            else:
+                print('Skill & Endorsements pane not found')
+        except Exception as e:
+            print(e)
+
+    def search_and_endorse(self,
+              query,
+              city_code,
+              college_code,
+              random_start=True,
+              max_pages=3,
+              max_endorsements=25,
+              sleep_delay=6):
+        """ search linkedin and connect from a given profile """
+
+        if quota_supervisor(Settings, "connects") == "jump":
+            return #False, "jumped"
+
+        print("Searching for: ", query, city_code, college_code)
+        search_url = "https://www.linkedin.com/search/results/people/?"
+        if city_code:
+            search_url = search_url + "&facetGeoRegion=" + city_code
+        if college_code:
+            search_url = search_url + "&facetSchool=" + college_code
+
+        search_url = search_url + "&facetNetwork=%5B%22F%22%5D"
+        search_url = search_url + "&keywords=" + query
+        search_url = search_url + "&origin=" + "FACETED_SEARCH"
+
+        if random_start:
+            trial = 0
+            while True and trial < 3:
+                st = random.randint(1, 3)
+                search_url = search_url + "&page=" + str(st)
+                web_address_navigator(self.browser, search_url, Settings)
+                print("Testing page:", st)
+                result_items = self.browser.find_elements_by_css_selector("div.search-result__wrapper")
+                if len(result_items) > 0:
+                    break
+                trial = trial + 1
+        else:
+            st = 1
+
+        connects = 0
+        for page_no in list(range(st, st + 1)):
+            collected_profile_links = []
+            try:
+                search_url = search_url + "&page=" + str(page_no)
+                web_address_navigator(self.browser, search_url, Settings)
+                print("Starting page:", page_no)
+
+                for jc in range(1, 10):
+                    sleep(1)
+                    self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight/" + str(jc) + ");")
+
+                result_items = self.browser.find_elements_by_css_selector("div.search-result__wrapper")
+
+                # print(result_items)
+                for result_item in result_items:
+                    try:
+                        link = result_item.find_element_by_css_selector("div > a")
+                        print("Profile : {}".format(link.get_attribute("href")))
+                        collected_profile_links.append(link.get_attribute("href"))
+                        name = result_item.find_element_by_css_selector("h3 > span > span > span")
+                        print("Name : {}".format(name.text))
+                    except Exception as e:
+                        print(e)
+            except Exception as e:
+                print(e)
+
+            for collected_profile_link in collected_profile_links:
+                self.endorse(collected_profile_link, sleep_delay=sleep_delay)
+                connects = connects + 1
+                if connects >= max_endorsements:
+                    print("max_endorsements({}) for this iteration reached , Returning...".format(max_endorsements))
+                    return
+
+
+            print("============Next Page==============")
+
+
     # def follow_user_followers(self,
     #                           usernames,
     #                           amount=10,
@@ -4960,14 +5069,14 @@ class LinkedinPy:
                                                  # self.mandatory_character in
                                                  # unicodedata.name(uchr))
 
-    # def run_time(self):
-    #     """ Get the time session lasted in seconds """
+    def run_time(self):
+        """ Get the time session lasted in seconds """
 
-    #     real_time = time.time()
-    #     run_time = (real_time - self.start_time)
-    #     run_time = truncate_float(run_time, 2)
+        real_time = time.time()
+        run_time = (real_time - self.start_time)
+        run_time = truncate_float(run_time, 2)
 
-    #     return run_time
+        return run_time
 
     # def check_character_set(self, unistr):
     #     self.check_letters = {}
