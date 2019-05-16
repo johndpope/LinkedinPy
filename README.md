@@ -27,9 +27,9 @@ It sends invite to your 2nd or 3rd degree connections fetched from linkedin sear
  with smart_run(session):
      session.search_and_connect(
                     query="founder",
-                    connection_code="%5B%22S%22%5D",
+                    connection_relationship_code="%5B%22S%22%5D",
                     city_code="%5B%22in%3A6508%22%5D",
-                    college_code="%5B%2213497%22%5D"
+                    school_code="%5B%2213497%22%5D"
                 )
  ```
 ### search and endorse
@@ -44,7 +44,7 @@ It simply endorses your first connections fetched from linkedin search
      session.search_and_endorse(
                     query="founder",
                     city_code="%5B%22in%3A6508%22%5D",
-                    college_code="%5B%2213497%22%5D"
+                    school_code="%5B%2213497%22%5D"
                 )
  ```
  

@@ -3037,9 +3037,9 @@ class LinkedinPy:
 
     def search_and_connect(self,
               query,
-              connection_code,
+              connection_relationship_code,
               city_code,
-              college_code,
+              school_code,
               random_start=True,
               max_pages=10,
               max_connects=25,
@@ -3049,15 +3049,15 @@ class LinkedinPy:
         if quota_supervisor(Settings, "connects") == "jump":
             return #False, "jumped"
 
-        print("Searching for: ", query, connection_code, city_code, college_code)
+        print("Searching for: query={}, connection_relationship_code={}, city_code={}, school_code={}".format(query, connection_relationship_code, city_code, school_code))
         connects = 0
         search_url = "https://www.linkedin.com/search/results/people/?"
-        if connection_code:
-            search_url = search_url + "&facetNetwork=" + connection_code
+        if connection_relationship_code:
+            search_url = search_url + "&facetNetwork=" + connection_relationship_code
         if city_code:
             search_url = search_url + "&facetGeoRegion=" + city_code
-        if college_code:
-            search_url = search_url + "&facetSchool=" + college_code
+        if school_code:
+            search_url = search_url + "&facetSchool=" + school_code
 
         search_url = search_url + "&keywords=" + query
         search_url = search_url + "&origin=" + "FACETED_SEARCH"
@@ -3192,7 +3192,7 @@ class LinkedinPy:
     def search_and_endorse(self,
               query,
               city_code,
-              college_code,
+              school_code,
               random_start=True,
               max_pages=3,
               max_endorsements=25,
@@ -3202,12 +3202,12 @@ class LinkedinPy:
         if quota_supervisor(Settings, "connects") == "jump":
             return #False, "jumped"
 
-        print("Searching for: ", query, city_code, college_code)
+        print("Searching for: ", query, city_code, school_code)
         search_url = "https://www.linkedin.com/search/results/people/?"
         if city_code:
             search_url = search_url + "&facetGeoRegion=" + city_code
-        if college_code:
-            search_url = search_url + "&facetSchool=" + college_code
+        if school_code:
+            search_url = search_url + "&facetSchool=" + school_code
 
         search_url = search_url + "&facetNetwork=%5B%22F%22%5D"
         search_url = search_url + "&keywords=" + query
