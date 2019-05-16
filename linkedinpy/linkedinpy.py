@@ -47,7 +47,7 @@ from socialcommons.util import parse_cli_args
 # from .unfollow_util  import unfollow_user
 # from .unfollow_util  import follow_user
 # from .unfollow_util  import follow_restriction
-from .unfollow_util  import dump_follow_restriction
+# from .unfollow_util  import dump_follow_restriction
 # from .unfollow_util  import set_automated_followed_pool
 # from .unfollow_util  import get_follow_requests
 
@@ -3197,7 +3197,7 @@ class LinkedinPy:
               max_pages=3,
               max_endorsements=25,
               sleep_delay=6):
-        """ search linkedin and connect from a given profile """
+        """ search linkedin and endose few first connections """
 
         if quota_supervisor(Settings, "connects") == "jump":
             return #False, "jumped"
@@ -4041,29 +4041,29 @@ class LinkedinPy:
     #     # include active user to not unfollow list
     #     self.dont_include.update(active_users)
 
-    def set_blacklist(self, enabled, campaign):
-        """
-         Enable/disable blacklist. If enabled, adds users to a blacklist
-        after interact with and adds users to dont_include list
-        """
+    # def set_blacklist(self, enabled, campaign):
+    #     """
+    #      Enable/disable blacklist. If enabled, adds users to a blacklist
+    #     after interact with and adds users to dont_include list
+    #     """
 
-        if enabled is False:
-            self.dont_include = self.white_list
-            return
+    #     if enabled is False:
+    #         self.dont_include = self.white_list
+    #         return
 
-        self.blacklist['enabled'] = True
-        self.blacklist['campaign'] = campaign
+    #     self.blacklist['enabled'] = True
+    #     self.blacklist['campaign'] = campaign
 
-        try:
-            with open('{}blacklist.csv'.format(self.logfolder), 'r') \
-                    as blacklist:
-                reader = csv.DictReader(blacklist)
-                for row in reader:
-                    if row['campaign'] == campaign:
-                        self.dont_include.add(row['username'])
-        # except:
-        except Exception:
-            self.logger.info('Campaign {} first run'.format(campaign))
+    #     try:
+    #         with open('{}blacklist.csv'.format(self.logfolder), 'r') \
+    #                 as blacklist:
+    #             reader = csv.DictReader(blacklist)
+    #             for row in reader:
+    #                 if row['campaign'] == campaign:
+    #                     self.dont_include.add(row['username'])
+    #     # except:
+    #     except Exception:
+    #         self.logger.info('Campaign {} first run'.format(campaign))
 
     # def grab_followers(self,
     #                    username=None,
@@ -4107,6 +4107,52 @@ class LinkedinPy:
     #                                       self.logger,
     #                                       self.logfolder)
     #     return grabbed_followers
+
+    def dump_follow_restriction(profile_name, logger, logfolder):
+        """ Dump follow restriction data to a local human-readable JSON """
+
+        try:
+            # get a DB and start a connection
+            db, id = get_database(Settings)
+            conn = sqlite3.connect(db)
+
+            with conn:
+                conn.row_factory = sqlite3.Row
+                cur = conn.cursor()
+
+                cur.execute(
+                    "SELECT * FROM followRestriction WHERE profile_id=:var",
+                    {"var": id})
+                data = cur.fetchall()
+
+            if data:
+                # get the existing data
+                filename = "{}followRestriction.json".format(logfolder)
+                if os.path.isfile(filename):
+                    with open(filename) as followResFile:
+                        current_data = json.load(followResFile)
+                else:
+                    current_data = {}
+
+                # pack the new data
+                follow_data = {user_data[1]: user_data[2] for user_data in
+                               data or []}
+                current_data[profile_name] = follow_data
+
+                # dump the fresh follow data to a local human readable JSON
+                with open(filename, 'w') as followResFile:
+                    json.dump(current_data, followResFile)
+
+        except Exception as exc:
+            logger.error(
+                "Pow! Error occurred while dumping follow restriction data to a "
+                "local JSON:\n\t{}".format(
+                    str(exc).encode("utf-8")))
+
+        finally:
+            if conn:
+                # close the open connection
+                conn.close()
 
     def end(self):
         """Closes the current session"""
