@@ -3042,7 +3042,7 @@ class LinkedinPy:
               college_code,
               random_start=True,
               max_pages=10,
-              max_connects=30,
+              max_connects=25,
               sleep_delay=6):
         """ search linkedin and connect from a given profile """
 
