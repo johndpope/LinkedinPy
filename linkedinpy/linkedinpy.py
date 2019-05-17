@@ -41,22 +41,6 @@ from socialcommons.util import highlight_print
 from socialcommons.util import truncate_float
 from socialcommons.util import save_account_progress
 from socialcommons.util import parse_cli_args
-# from .unfollow_util  import get_given_user_followers
-# from .unfollow_util  import get_given_user_following
-# from .unfollow_util  import unfollow
-# from .unfollow_util  import unfollow_user
-# from .unfollow_util  import follow_user
-# from .unfollow_util  import follow_restriction
-# from .unfollow_util  import dump_follow_restriction
-# from .unfollow_util  import set_automated_followed_pool
-# from .unfollow_util  import get_follow_requests
-
-# from .relationship_tools import get_following
-# from .relationship_tools import get_followers 
-# from .relationship_tools import get_unfollowers
-# from .relationship_tools import get_nonfollowers
-# from .relationship_tools import get_fans
-# from .relationship_tools import get_mutual_following
 
 from socialcommons.database_engine import get_database
 from socialcommons.text_analytics import text_analysis
