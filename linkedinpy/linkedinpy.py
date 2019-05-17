@@ -4166,7 +4166,7 @@ class LinkedinPy:
                 self.display.stop()
 
             # write useful information
-            dump_follow_restriction(self.username,
+            self.dump_follow_restriction(self.username,
                                     self.logger,
                                     self.logfolder)
             # dump_record_activity(self.username,
