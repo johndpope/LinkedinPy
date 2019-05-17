@@ -22,7 +22,7 @@ It sends invite to your 2nd or 3rd degree connections fetched from linkedin sear
  
 ```python
 
- session = InstaPy()
+ session = LinkedinPy()
 
  with smart_run(session):
      session.search_and_connect(
@@ -38,7 +38,7 @@ It simply endorses your first connections fetched from linkedin search
 
 ```python
 
- session = InstaPy()
+ session = LinkedinPy()
 
  with smart_run(session):
      session.search_and_endorse(
