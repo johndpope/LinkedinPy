@@ -9,6 +9,8 @@ import os
 import csv
 import json
 import requests
+import sqlite3
+
 from selenium import webdriver
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.action_chains import ActionChains
