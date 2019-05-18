@@ -738,7 +738,7 @@ class LinkedinPy:
             print("============Next Page==============")
 
 
-    def dump_follow_restriction(profile_name, logger, logfolder):
+    def dump_follow_restriction(self, profile_name, logger, logfolder):
         """ Dump follow restriction data to a local human-readable JSON """
 
         try:
