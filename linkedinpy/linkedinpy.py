@@ -94,7 +94,7 @@ class LinkedinPy:
             cli_args.bypass_suspicious_attempt or bypass_suspicious_attempt)
         bypass_with_mobile = cli_args.bypass_with_mobile or bypass_with_mobile
 
-        FACEBOOKPY_IS_RUNNING = True
+        IS_RUNNING = True
         # workspace must be ready before anything
         if not get_workspace(Settings):
             raise SocialPyError(
