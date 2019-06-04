@@ -38,8 +38,8 @@ with smart_run(session):
     location_codes = ["3A6508", "3A7127", "3A7127", "3A7150", "3A7151", "3A6891"]
     school_codes = ["13496", "13497", "13498", "13499", "13500", "13501", "13502", "19949", "19950", "19952", "19953"]
 
-    lc1, lc2 =  min(now.weekday() % len(location_codes), len(location_codes)-1), min(len(location_codes) % now.weekday(), len(location_codes)-1)
-    cc1, cc2 =  min(now.day % len(school_codes),len(school_codes)-1),  min(len(school_codes) % now.day, len(school_codes)-1)
+    lc1, lc2 =  min(now.weekday() % len(location_codes), len(location_codes)-1), min(len(location_codes) % (now.weekday()+1), len(location_codes)-1)
+    cc1, cc2 =  min(now.day % len(school_codes),len(school_codes)-1),  min(len(school_codes) % (now.day+1), len(school_codes)-1)
     location_codes_today = [location_codes[lc1], location_codes[lc2]]
     school_codes_today = [school_codes[cc1], school_codes[cc2]]
 
