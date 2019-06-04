@@ -11,7 +11,7 @@ from socialcommons.util import web_address_navigator
 from socialcommons.util import reload_webpage
 from socialcommons.util import click_element
 from socialcommons.util import get_current_url
-# from socialcommons.util import check_authorization
+from socialcommons.util import explicit_wait
 from .settings import Settings
 
 # import exceptions
@@ -290,16 +290,14 @@ def login_user(browser,
     # update server calls
     update_activity(Settings)
 
-    sleep(1)
-
     # dismiss_get_app_offer(browser, logger)
     # dismiss_notification_offer(browser, logger)
 
-    if bypass_suspicious_attempt is True:
-        bypass_suspicious_login(browser, bypass_with_mobile)
+    # if bypass_suspicious_attempt is True:
+    #     bypass_suspicious_login(browser, bypass_with_mobile)
 
     # wait until page fully load
-    # explicit_wait(browser, "PFL", [], logger, 5)
+    explicit_wait(browser, "PFL", [], logger, 5)
 
     # Check if user is logged-in (If there's two 'nav' elements)
     current_url = get_current_url(browser)
