@@ -526,6 +526,7 @@ class LinkedinPy:
 
         print("Searching for: query={}, connection_relationship_code={}, city_code={}, school_code={}".format(query, connection_relationship_code, city_code, school_code))
         connects = 0
+        prev_connects = -1
         search_url = "https://www.linkedin.com/search/results/people/?"
         if connection_relationship_code:
             search_url = search_url + "&facetNetwork=" + connection_relationship_code
@@ -539,8 +540,9 @@ class LinkedinPy:
 
         if random_start:
             trial = 0
+            st = 10
             while True and trial < 10:
-                st = random.randint(1, 10)
+                st = random.randint(1, st)
                 search_url = search_url + "&page=" + str(st)
                 web_address_navigator(self.browser, search_url, Settings)
                 print("Testing page:", st)
@@ -552,6 +554,13 @@ class LinkedinPy:
             st = 1
 
         for page_no in list(range(st, st + max_pages)):
+
+            if prev_connects==connects:
+                print("============Limits might have exceeded or all Invites pending from this page(let's exit either case)==============")
+                break
+            else:
+                prev_connects = connects
+
             try:
                 search_url = search_url + "&page=" + str(page_no)
                 web_address_navigator(self.browser, search_url, Settings)
@@ -563,6 +572,9 @@ class LinkedinPy:
 
                 result_items = self.browser.find_elements_by_css_selector("div.search-result__wrapper")
                 # print(result_items)
+                if len(result_items)==0:
+                    print("============Last Page Reached or asking for Premium membership==============")
+                    break
                 for result_item in result_items:
                     try:
                         link = result_item.find_element_by_css_selector("div > a")
@@ -592,9 +604,15 @@ class LinkedinPy:
                                          .perform())
                                         print("Clicked", send_button.text)
                                         connects = connects + 1
+                                        try:
+                                            # update server calls
+                                            update_activity(Settings, 'connects')
+                                        except Exception as e:
+                                            print(e)
                                         sleep(2)
                                     else:
                                         try:
+                                            input("find close XPATH")
                                             close_button = modal.find_element_by_xpath("//div[1]/div/section/div/header/button")
                                             (ActionChains(self.browser)
                                              .move_to_element(close_button)
@@ -610,12 +628,17 @@ class LinkedinPy:
                                 print("Popup not found")
                         except Exception as e:
                             print("Popup not found, Failed with:", e)
-
-                        try:
-                            # update server calls
-                            update_activity(Settings, 'connects')
-                        except Exception as e:
-                            print(e)
+                            try:
+                                new_popup_buttons = find_elements_by_css_selector("#artdeco-modal-outlet div.artdeco-modal-overlay div.artdeco-modal div.artdeco-modal__actionbar button.artdeco-button")
+                                gotit_button = new_popup_buttons[1]
+                                (ActionChains(self.browser)
+                                 .move_to_element(gotit_button)
+                                 .click()
+                                 .perform())
+                                print(gotit_button.text, " clicked")
+                                sleep(2)
+                            except Exception as e:
+                                print("New Popup also not found, Failed with:", e)
 
                         print("Connects sent in this iteration: {}".format(connects))
                         delay_random = random.randint(
@@ -995,8 +1018,10 @@ class LinkedinPy:
 @contextmanager
 def smart_run(session):
     try:
-        session.login()
-        yield
+        if session.login():
+            yield
+        else:
+            print("Not proceeding as login failed")
 
     except (Exception, KeyboardInterrupt) as exc:
         if isinstance(exc, NoSuchElementException):

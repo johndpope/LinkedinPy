@@ -290,6 +290,8 @@ def login_user(browser,
     # update server calls
     update_activity(Settings)
 
+    sleep(10)
+
     # dismiss_get_app_offer(browser, logger)
     # dismiss_notification_offer(browser, logger)
 
@@ -297,7 +299,9 @@ def login_user(browser,
     #     bypass_suspicious_login(browser, bypass_with_mobile)
 
     # wait until page fully load
-    explicit_wait(browser, "PFL", [], logger, 5)
+    current_url = get_current_url(browser)
+    if current_url !=  "https://www.linkedin.com/feed/":
+        explicit_wait(browser, "PFL", [], logger, 5)
 
     # Check if user is logged-in (If there's two 'nav' elements)
     current_url = get_current_url(browser)
