@@ -514,7 +514,8 @@ class LinkedinPy:
               query,
               connection_relationship_code,
               city_code,
-              school_code,
+              school_code=None,
+              past_company=None,
               random_start=True,
               max_pages=10,
               max_connects=25,
@@ -534,6 +535,8 @@ class LinkedinPy:
             search_url = search_url + "&facetGeoRegion=" + city_code
         if school_code:
             search_url = search_url + "&facetSchool=" + school_code
+        if past_company:
+            search_url = search_url + "&facetPastCompany=" + past_company
 
         search_url = search_url + "&keywords=" + query
         search_url = search_url + "&origin=" + "FACETED_SEARCH"
@@ -612,7 +615,7 @@ class LinkedinPy:
                                         sleep(2)
                                     else:
                                         try:
-                                            input("find close XPATH")
+                                            #TODO: input("find correct close XPATH")
                                             close_button = modal.find_element_by_xpath("//div[1]/div/section/div/header/button")
                                             (ActionChains(self.browser)
                                              .move_to_element(close_button)
