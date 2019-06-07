@@ -6,12 +6,12 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 # import LinkedinPy modules
 from socialcommons.time_util import sleep
-from socialcommons.util import update_activity
-from socialcommons.util import web_address_navigator
-from socialcommons.util import reload_webpage
-from socialcommons.util import click_element
-from socialcommons.util import get_current_url
-from socialcommons.util import explicit_wait
+from .util import update_activity
+from .util import web_address_navigator
+from .util import reload_webpage
+from .util import click_element
+from .util import get_current_url
+from .util import explicit_wait
 from .settings import Settings
 
 # import exceptions
@@ -159,7 +159,7 @@ def login_user(browser,
 
     print(username, password)
     ig_homepage = "https://www.linkedin.com/login/"
-    web_address_navigator( browser, ig_homepage, Settings)
+    web_address_navigator(Settings, browser, ig_homepage)
     # cookie_loaded = False
 
     # try to load cookie from username
@@ -181,7 +181,7 @@ def login_user(browser,
     #         if link.get_attribute('title') == "English (UK)":
     #             click_element(browser, Settings, link)
 
-    # web_address_navigator(browser, ig_homepage, Settings)
+    # web_address_navigator(Settings,browser, ig_homepage)
     # reload_webpage(browser, Settings)
 
     # cookie has been LOADED, so the user SHOULD be logged in

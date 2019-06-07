@@ -29,7 +29,7 @@ with smart_run(session):
         notify_me=True,
         peak_likes=(5, 55),
         peak_connects=(5, None),
-        peak_unfollows=(5, 40),
+        peak_unconnects=(5, 40),
         peak_server_calls=(500, None))
 
     # activity

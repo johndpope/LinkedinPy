@@ -11,6 +11,8 @@ import json
 import requests
 import sqlite3
 
+import pprint as pp
+
 from selenium import webdriver
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.action_chains import ActionChains
@@ -27,24 +29,24 @@ from tempfile import gettempdir
 # import LinkedinPy modules
 from socialcommons.clarifai_util import check_image
 from .login_util import login_user
-from socialcommons.print_log_writer import log_follower_num
-from socialcommons.print_log_writer import log_following_num
+from .print_log_writer import log_connecter_num
+from .print_log_writer import log_connecting_num
 
 from socialcommons.time_util import sleep
 from socialcommons.time_util import set_sleep_percentage
 
-from socialcommons.util import update_activity
-# from socialcommons.util import get_active_users
-from socialcommons.util import validate_userid
-from socialcommons.util import web_address_navigator
-from socialcommons.util import interruption_handler
-from socialcommons.util import highlight_print
-# from socialcommons.util import dump_record_activity
-from socialcommons.util import truncate_float
-from socialcommons.util import save_account_progress
-from socialcommons.util import parse_cli_args
+from .util import update_activity
+# from .util import get_active_users
+from .util import validate_username
+from .util import web_address_navigator
+from .util import interruption_handler
+from .util import highlight_print
+# from .util import dump_record_activity
+from .util import truncate_float
+from .util import save_account_progress
+from .util import parse_cli_args
 
-from socialcommons.database_engine import get_database
+from .database_engine import get_database
 from socialcommons.text_analytics import text_analysis
 from socialcommons.text_analytics import yandex_supported_languages
 from socialcommons.browser import set_selenium_local_session
@@ -53,6 +55,8 @@ from socialcommons.file_manager import get_workspace
 from socialcommons.file_manager import get_logfolder
 
 from socialcommons.quota_supervisor import quota_supervisor
+
+from .unconnect_util import connect_restriction
 
 # import exceptions
 from selenium.common.exceptions import NoSuchElementException
@@ -82,7 +86,7 @@ class LinkedinPy:
 
         cli_args = parse_cli_args()
         username = cli_args.username or username
-        userid = cli_args.userid or userid
+        # userid = cli_args.userid or userid
         password = cli_args.password or password
         use_firefox = cli_args.use_firefox or use_firefox
         page_delay = cli_args.page_delay or page_delay
@@ -118,9 +122,9 @@ class LinkedinPy:
         self.username = username or os.environ.get('LINKEDIN_USER')
         self.password = password or os.environ.get('LINKEDIN_PW')
 
-        self.userid = userid
-        if not self.userid:
-            self.userid = self.username.split('@')[0]
+        # self.userid = userid
+        # if not self.userid:
+        #     self.userid = self.username.split('@')[0]
 
         Settings.profile["name"] = self.username
 
@@ -151,15 +155,15 @@ class LinkedinPy:
         self.already_connected = 0
         self.unconnected = 0
         self.connected_by = 0
-        self.following_num = 0
+        self.connecting_num = 0
         self.inap_img = 0
         self.not_valid_users = 0
         self.video_played = 0
         self.already_Visited = 0
 
-        self.follow_times = 1
-        self.do_follow = False
-        self.follow_percentage = 0
+        self.connect_times = 1
+        self.do_connect = False
+        self.connect_percentage = 0
         self.dont_include = set()
         self.white_list = set()
         self.blacklist = {'enabled': 'True', 'campaign': ''}
@@ -177,7 +181,7 @@ class LinkedinPy:
         self.user_interact_media = None
         self.user_interact_percentage = 0
         self.user_interact_random = False
-        self.dont_follow_inap_post = True
+        self.dont_connect_inap_post = True
 
         self.use_clarifai = False
         self.clarifai_api_key = None
@@ -193,10 +197,10 @@ class LinkedinPy:
         self.potency_ratio = None   # 1.3466
         self.delimit_by_numbers = None
 
-        self.max_followers = None   # 90000
-        self.max_following = None   # 66834
-        self.min_followers = None   # 35
-        self.min_following = None   # 27
+        self.max_connecters = None   # 90000
+        self.max_connecting = None   # 66834
+        self.min_connecters = None   # 35
+        self.min_connecting = None   # 27
 
         self.delimit_liking = False
         self.liking_approved = True
@@ -220,7 +224,7 @@ class LinkedinPy:
         self.skip_private_percentage = 100
 
         self.relationship_data = {
-            username: {"all_following": [], "all_followers": []}}
+            username: {"all_connecting": [], "all_connecters": []}}
 
         self.simulation = {"enabled": True, "percentage": 100}
 
@@ -234,9 +238,9 @@ class LinkedinPy:
         # hold the consecutive jumps and set max of it used with QS to break
         # loops
         self.jumps = {"consequent": {"likes": 0, "comments": 0, "connects": 0,
-                                     "unfollows": 0},
+                                     "unconnects": 0},
                       "limit": {"likes": 7, "comments": 3, "connects": 5,
-                                "unfollows": 4}}
+                                "unconnects": 4}}
 
         # stores the features' name which are being used by other features
         self.internal_usage = {}
@@ -353,7 +357,7 @@ class LinkedinPy:
         """Used to login the user either with the username and password"""
         if not login_user(self.browser,
                           self.username,
-                          self.userid,
+                          None,
                           self.password,
                           self.logger,
                           self.logfolder,
@@ -395,8 +399,8 @@ class LinkedinPy:
                           enabled=False,
                           like=None,
                           comment=None,
-                          follow=None,
-                          unfollow=None,
+                          connect=None,
+                          unconnect=None,
                           randomize=False,
                           random_range=(None, None),
                           safety_match=True):
@@ -404,8 +408,8 @@ class LinkedinPy:
         Settings.action_delays.update({"enabled": enabled,
                                        "like": like,
                                        "comment": comment,
-                                       "follow": follow,
-                                       "unfollow": unfollow,
+                                       "connect": connect,
+                                       "unconnect": unconnect,
                                        "randomize": randomize,
                                        "random_range": random_range,
                                        "safety_match": safety_match})
@@ -428,10 +432,10 @@ class LinkedinPy:
                                 delimit_by_numbers=None,
                                 min_posts=None,
                                 max_posts=None,
-                                max_followers=None,
-                                max_following=None,
-                                min_followers=None,
-                                min_following=None):
+                                max_connecters=None,
+                                max_connecting=None,
+                                min_connecters=None,
+                                min_connecting=None):
         """Sets the potency ratio and limits to the provide an efficient
         activity between the targeted masses"""
 
@@ -439,44 +443,44 @@ class LinkedinPy:
         self.delimit_by_numbers = delimit_by_numbers if enabled is True else \
             None
 
-        self.max_followers = max_followers
-        self.min_followers = min_followers
+        self.max_connecters = max_connecters
+        self.min_connecters = min_connecters
 
-        self.max_following = max_following
-        self.min_following = min_following
+        self.max_connecting = max_connecting
+        self.min_connecting = min_connecting
 
         self.min_posts = min_posts if enabled is True else None
         self.max_posts = max_posts if enabled is True else None
 
-    def validate_user_call(self, user_name):
-        """ Short call of validate_userid() function """
-        validation, details = \
-            validate_userid(self.browser,
-                            "https://linkedin.com/",
-                            user_name,
-                            self.username,
-                            self.userid,
-                            self.ignore_users,
-                            self.blacklist,
-                            self.potency_ratio,
-                            self.delimit_by_numbers,
-                            self.max_followers,
-                            self.max_following,
-                            self.min_followers,
-                            self.min_following,
-                            self.min_posts,
-                            self.max_posts,
-                            self.skip_private,
-                            self.skip_private_percentage,
-                            self.skip_no_profile_pic,
-                            self.skip_no_profile_pic_percentage,
-                            self.skip_business,
-                            self.skip_business_percentage,
-                            self.skip_business_categories,
-                            self.dont_skip_business_categories,
-                            self.logger,
-                            self.logfolder, Settings)
-        return validation, details
+    # def validate_user_call(self, user_name):
+    #     """ Short call of validate_username() function """
+    #     validation, details = \
+    #         validate_username(self.browser,
+    #                         "https://linkedin.com/",
+    #                         user_name,
+    #                         self.username,
+    #                         self.userid,
+    #                         self.ignore_users,
+    #                         self.blacklist,
+    #                         self.potency_ratio,
+    #                         self.delimit_by_numbers,
+    #                         self.max_connecters,
+    #                         self.max_connecting,
+    #                         self.min_connecters,
+    #                         self.min_connecting,
+    #                         self.min_posts,
+    #                         self.max_posts,
+    #                         self.skip_private,
+    #                         self.skip_private_percentage,
+    #                         self.skip_no_profile_pic,
+    #                         self.skip_no_profile_pic_percentage,
+    #                         self.skip_business,
+    #                         self.skip_business_percentage,
+    #                         self.skip_business_categories,
+    #                         self.dont_skip_business_categories,
+    #                         self.logger,
+    #                         self.logfolder, Settings)
+    #     return validation, details
 
     def set_skip_users(self,
                        skip_private=True,
@@ -544,13 +548,12 @@ class LinkedinPy:
         if random_start:
             trial = 0
             st = 10
-            while True and trial < 10:
-                st = random.randint(1, st)
-                search_url = search_url + "&page=" + str(st)
-                web_address_navigator(self.browser, search_url, Settings)
+            while True and trial < 5 and st > 1:
+                st = random.randint(1, st-1)
+                temp_search_url = search_url + "&page=" + str(st)
+                web_address_navigator(Settings,self.browser, temp_search_url)
                 print("Testing page:", st)
-                result_items = self.browser.find_elements_by_css_selector("div.search-result__wrapper")
-                if len(result_items) > 0:
+                if len(self.browser.find_elements_by_css_selector("div.search-result__wrapper")) > 0:
                     break
                 trial = trial + 1
         else:
@@ -565,33 +568,36 @@ class LinkedinPy:
                 prev_connects = connects
 
             try:
-                search_url = search_url + "&page=" + str(page_no)
-                web_address_navigator(self.browser, search_url, Settings)
+                temp_search_url = search_url + "&page=" + str(page_no)
+                web_address_navigator(Settings,self.browser, temp_search_url)
                 print("Starting page:", page_no)
 
-                for jc in range(1, 10):
+                for jc in range(2, 11):
                     sleep(1)
                     self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight/" + str(jc) + ");")
 
-                result_items = self.browser.find_elements_by_css_selector("div.search-result__wrapper")
-                # print(result_items)
-                if len(result_items)==0:
+                if len(self.browser.find_elements_by_css_selector("div.search-result__wrapper"))==0:
                     print("============Last Page Reached or asking for Premium membership==============")
                     break
-                for result_item in result_items:
+                for i in range(0, len(self.browser.find_elements_by_css_selector("div.search-result__wrapper"))):
                     try:
-                        link = result_item.find_element_by_css_selector("div > a")
-                        print("Profile : {}".format(link.get_attribute("href")))
-                        name = result_item.find_element_by_css_selector("h3 > span > span > span")#//span/span/span[1]")
+                        res_item = self.browser.find_elements_by_css_selector("li.search-result div.search-entity div.search-result__wrapper")[i]# div.search-result__actions div button")
+                        pp.pprint(res_item.get_attribute('innerHTML'))
+                        link = res_item.find_element_by_css_selector("div > a")
+                        profile_link = link.get_attribute("href")
+                        print("Profile : {}".format(profile_link))
+                        user_name = profile_link.split('/')[4]
+                        print("user_name : {}".format(user_name))
+                        name = res_item.find_element_by_css_selector("h3 > span > span > span")#//span/span/span[1]")
                         print("Name : {}".format(name.text))
                         try:
-                            connect_button = result_item.find_element_by_xpath("//div[3]/div/button[text()='Connect']")
+                            connect_button = res_item.find_element_by_xpath("//div[3]/div/button[text()='Connect']")
                             print("Connect button found, connecting...")
-                            self.browser.execute_script("var evt = document.createEvent('MouseEvents');" + "evt.initMouseEvent('click',true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);" + "arguments[0].dispatchEvent(evt);", self.browser.find_element(By.XPATH, '//button[text()="Connect"]'));
+                            self.browser.execute_script("var evt = document.createEvent('MouseEvents');" + "evt.initMouseEvent('click',true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);" + "arguments[0].dispatchEvent(evt);", res_item.find_element_by_xpath('//div[3]/div/button[text()="Connect"]'))
                             print("Clicked", connect_button.text)
                             sleep(2)
                         except Exception as e:
-                            invite_sent_button = result_item.find_element_by_xpath("//div[3]/div/button[text()='Invite Sent']")
+                            invite_sent_button = res_item.find_element_by_xpath("//div[3]/div/button[text()='Invite Sent']")
                             print("Already", invite_sent_button.text)
                             continue
 
@@ -607,6 +613,7 @@ class LinkedinPy:
                                          .perform())
                                         print("Clicked", send_button.text)
                                         connects = connects + 1
+                                        connect_restriction("write", user_name, None, self.logger)
                                         try:
                                             # update server calls
                                             update_activity(Settings, 'connects')
@@ -661,7 +668,7 @@ class LinkedinPy:
               profile_link,
               sleep_delay):
         try:
-            web_address_navigator(self.browser, profile_link, Settings)
+            web_address_navigator(Settings,self.browser, profile_link)
 
             for jc in range(1, 10):
                 sleep(1)
@@ -718,8 +725,8 @@ class LinkedinPy:
             trial = 0
             while True and trial < 3:
                 st = random.randint(1, 3)
-                search_url = search_url + "&page=" + str(st)
-                web_address_navigator(self.browser, search_url, Settings)
+                temp_search_url = search_url + "&page=" + str(st)
+                web_address_navigator(Settings,self.browser, temp_search_url)
                 print("Testing page:", st)
                 result_items = self.browser.find_elements_by_css_selector("div.search-result__wrapper")
                 if len(result_items) > 0:
@@ -732,11 +739,11 @@ class LinkedinPy:
         for page_no in list(range(st, st + 1)):
             collected_profile_links = []
             try:
-                search_url = search_url + "&page=" + str(page_no)
-                web_address_navigator(self.browser, search_url, Settings)
+                temp_search_url = search_url + "&page=" + str(page_no)
+                web_address_navigator(Settings,self.browser, temp_search_url)
                 print("Starting page:", page_no)
 
-                for jc in range(1, 10):
+                for jc in range(2, 11):
                     sleep(1)
                     self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight/" + str(jc) + ");")
 
@@ -766,8 +773,8 @@ class LinkedinPy:
             print("============Next Page==============")
 
 
-    def dump_follow_restriction(self, profile_name, logger, logfolder):
-        """ Dump follow restriction data to a local human-readable JSON """
+    def dump_connect_restriction(self, profile_name, logger, logfolder):
+        """ Dump connect restriction data to a local human-readable JSON """
 
         try:
             # get a DB and start a connection
@@ -779,31 +786,31 @@ class LinkedinPy:
                 cur = conn.cursor()
 
                 cur.execute(
-                    "SELECT * FROM followRestriction WHERE profile_id=:var",
+                    "SELECT * FROM connectRestriction WHERE profile_id=:var",
                     {"var": id})
                 data = cur.fetchall()
 
             if data:
                 # get the existing data
-                filename = "{}followRestriction.json".format(logfolder)
+                filename = "{}connectRestriction.json".format(logfolder)
                 if os.path.isfile(filename):
-                    with open(filename) as followResFile:
-                        current_data = json.load(followResFile)
+                    with open(filename) as connectResFile:
+                        current_data = json.load(connectResFile)
                 else:
                     current_data = {}
 
                 # pack the new data
-                follow_data = {user_data[1]: user_data[2] for user_data in
+                connect_data = {user_data[1]: user_data[2] for user_data in
                                data or []}
-                current_data[profile_name] = follow_data
+                current_data[profile_name] = connect_data
 
-                # dump the fresh follow data to a local human readable JSON
-                with open(filename, 'w') as followResFile:
-                    json.dump(current_data, followResFile)
+                # dump the fresh connect data to a local human readable JSON
+                with open(filename, 'w') as connectResFile:
+                    json.dump(current_data, connectResFile)
 
         except Exception as exc:
             logger.error(
-                "Pow! Error occurred while dumping follow restriction data to a "
+                "Pow! Error occurred while dumping connect restriction data to a "
                 "local JSON:\n\t{}".format(
                     str(exc).encode("utf-8")))
 
@@ -824,7 +831,7 @@ class LinkedinPy:
                 self.display.stop()
 
             # write useful information
-            self.dump_follow_restriction(self.username,
+            self.dump_connect_restriction(self.username,
                                     self.logger,
                                     self.logfolder)
             # dump_record_activity(self.username,
@@ -833,8 +840,8 @@ class LinkedinPy:
             #                      Settings)
 
             with open('{}connected.txt'.format(self.logfolder), 'w') \
-                    as followFile:
-                followFile.write(str(self.connected))
+                    as connectFile:
+                connectFile.write(str(self.connected))
 
             # output live stats before leaving
             self.live_report()
@@ -853,7 +860,7 @@ class LinkedinPy:
                              peak_likes=(None, None),
                              peak_comments=(None, None),
                              peak_connects=(None, None),
-                             peak_unfollows=(None, None),
+                             peak_unconnects=(None, None),
                              peak_server_calls=(None, None)):
         """
          Sets aside QS configuration ANY time in a session
@@ -863,7 +870,7 @@ class LinkedinPy:
 
         # strong type checking on peaks entered
         peak_values_combined = [peak_likes, peak_comments, peak_connects,
-                                peak_unfollows, peak_server_calls]
+                                peak_unconnects, peak_server_calls]
         peaks_are_tuple = all(type(item) is tuple for
                               item in peak_values_combined)
 
@@ -891,8 +898,8 @@ class LinkedinPy:
                                   "daily": peak_comments[1]},
                      "connects": {"hourly": peak_connects[0],
                                  "daily": peak_connects[1]},
-                     "unfollows": {"hourly": peak_unfollows[0],
-                                   "daily": peak_unfollows[1]},
+                     "unconnects": {"hourly": peak_unconnects[0],
+                                   "daily": peak_unconnects[1]},
                      "server_calls": {"hourly": peak_server_calls[0],
                                       "daily": peak_server_calls[1]}}
 
@@ -959,11 +966,11 @@ class LinkedinPy:
                  self.inap_img,
                  self.not_valid_users]
 
-        if self.following_num and self.connected_by:
+        if self.connecting_num and self.connected_by:
             owner_relationship_info = (
-                "On session start was FOLLOWING {} users"
-                " & had {} FOLLOWERS"
-                .format(self.following_num,
+                "On session start was connectING {} users"
+                " & had {} connectERS"
+                .format(self.connecting_num,
                         self.connected_by))
         else:
             owner_relationship_info = ''

@@ -23,6 +23,7 @@ class Settings:
 
     # locations
     log_location = localize_path("LinkedinPy", "logs")
+    database_location = localize_path("db", "linkedinpy.db")
     OS_ENV = ("windows" if platform == "win32"
         else "osx" if platform == "darwin"
         else "linux")
@@ -70,8 +71,8 @@ class Settings:
 
     DATABASE_LOCATION = localize_path("LinkedinPy", "db", "linkedinpy.db")
 
-    followers_count_xpath = '//div[2]/div[1]/nav/a[1]/span'
-    following_count_xpath = '//div[2]/div[1]/nav/a[1]/span'
+    # connecters_count_xpath = '//div[2]/div[1]/nav/a[1]/span'
+    # connecting_count_xpath = '//div[2]/div[1]/nav/a[1]/span'
 
 # class Storage:
     """ Globally accessible standalone storage """

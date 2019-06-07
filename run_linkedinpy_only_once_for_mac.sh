@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This is a script to mitigate possibility of multiple parallel cron jobs being triggered(discussed here: https://github.com/timgrossmann/InstaPy/issues/1235)
-# The following is an example of a cron scheduled every 12 hours
+# The connecting is an example of a cron scheduled every 12 hours
 # 0 */12 * * * bash /path/to/LinkedinPy/run_linkedinpy_only_once_for_mac.sh /path/to/LinkedinPy/quickstart.py $USERNAME $PASSWORD
 
 TEMPLATE_PATH=$1
