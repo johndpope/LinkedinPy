@@ -15,8 +15,8 @@ pip install -r requirements.txt
 ##  APIs:
   - [search and connect](#search-and-connect)
   - [search and endorse](#search-and-endorse)
-  - [search 1st connects and save to db and connect](#search-1st-connects-and-save-to-db-and-connect)
-  - [withdraw old invitations](#withdraw_old_invitations)
+  - [search 1st connects and save to db](#search-1st-connects-and-save-to-db)
+  - [withdraw old invitations](#withdraw-old-invitations)
 
 ### search and connect
  
@@ -51,7 +51,7 @@ It simply endorses your first connections fetched from linkedin search
  ```
 
 
-### search 1st connects and save to db and connect
+### search 1st connects and save to db
 
 It's a API to backup already connected contacts to local DB(for old connections and connections not made through search_and_connect API)
  
@@ -76,7 +76,7 @@ It's a API to withdraw invitation a month or more older
  session = LinkedinPy()
 
  with smart_run(session):
-    session.withdraw_old_invitations()
+    session.withdraw_old_invitations(skip_pages=5)
  ```
  
  
