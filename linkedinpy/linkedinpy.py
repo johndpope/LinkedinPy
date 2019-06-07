@@ -514,6 +514,77 @@ class LinkedinPy:
                     # dont_skip_business_categories = [] Setted by default
                     # in init
 
+    def withdraw_old_invitations(self,
+            skip_pages=10,
+            sleep_delay=6):
+        page_no = skip_pages
+        while page_no < 100:
+            page_no = page_no + 1
+            try:
+                url = "https://www.linkedin.com/mynetwork/invitation-manager/sent/?page=" + str(page_no)
+                web_address_navigator(Settings,self.browser, url)
+                print("Starting page:", page_no)
+                if self.browser.current_url=="https://www.linkedin.com/mynetwork/invitation-manager/sent/" or len(self.browser.find_elements_by_css_selector("li.invitation-card div.pl5"))==0:
+                    print("============Last Page Reached==============")
+                    break
+                checked_in_page = 0
+                for i in range(0, len(self.browser.find_elements_by_css_selector("li.invitation-card div.pl5"))):
+                    try:
+                        res_item = self.browser.find_elements_by_css_selector("li.invitation-card div.pl5")[i]
+                        try:
+                            link = res_item.find_element_by_css_selector("div > a")
+                            profile_link = link.get_attribute("href")
+                            user_name = profile_link.split('/')[4]
+                            print("user_name : {}".format(user_name))
+                        except Exception as e:
+                            print("Might be a stale profile", e)
+                        time = res_item.find_element_by_css_selector("div > time")
+                        print("time : {}".format(time.text))
+                        check_button = res_item.find_element_by_css_selector("div > div:nth-child(1) > input")
+                        check_status = check_button.get_attribute("data-artdeco-is-focused")
+                        print("check_status : {}".format(check_status))
+
+                        self.browser.execute_script("window.scrollTo(0, " + str((i+1)*104) + ");")
+
+                        if "month" in time.text:
+                            (ActionChains(self.browser)
+                             .move_to_element(check_button)
+                             .click()
+                             .perform())
+                            print("check_button clicked")
+                            checked_in_page = checked_in_page + 1
+                            delay_random = random.randint(
+                                        ceil(sleep_delay * 0.42),
+                                        ceil(sleep_delay * 0.57))
+                            sleep(delay_random)
+                    except Exception as e:
+                        print(e)
+                if checked_in_page > 0:
+                    print("Widraw to be pressed")
+                    try:
+                        self.browser.execute_script("window.scrollTo(0, 0);")
+                        withdraw_button = self.browser.find_element_by_css_selector("ul > li.mn-list-toolbar__right-button > button")
+                        print("withdraw_button : {}".format(withdraw_button.text))
+                        if "Withdraw" in withdraw_button.text:
+                            (ActionChains(self.browser)
+                             .move_to_element(withdraw_button)
+                             .click()
+                             .perform())
+                            print("withdraw_button clicked")
+                            page_no = page_no - 1
+                            delay_random = random.randint(
+                                        ceil(sleep_delay * 0.85),
+                                        ceil(sleep_delay * 1.14))
+                            sleep(delay_random)
+                    except Exception as e:
+                        print("For some reason there is no withdraw_button inspite of checkings", e)
+                else:
+                    print("Nothing checked in this page")
+            except Exception as e:
+                print(e)
+            print("============Next Page==============")
+
+
     def search_1stconnects_and_savetodb(self,
               query,
               city_code,

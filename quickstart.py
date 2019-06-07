@@ -61,3 +61,5 @@ with smart_run(session):
                 school_code="%5B%22" + school_code + "%22%5D"
             )
 
+    session.withdraw_old_invitations()
+
