@@ -13,9 +13,9 @@ pip install -r requirements.txt
 ```
 
 ##  APIs:
-- **[Actions](#actions)**
-  - [search and connect](#search_and_connect)
-  - [search and endorse](#search_and_endorse)
+  - [search and connect](#search-and-connect)
+  - [search and endorse](#search-and-endorse)
+  - [search 1st connects and save to db and connect](search-1st-connects-and-save-to-db-and-connect)
 
 ### search and connect
  
