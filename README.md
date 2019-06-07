@@ -48,6 +48,25 @@ It simply endorses your first connections fetched from linkedin search
                     school_code="%5B%2213497%22%5D"
                 )
  ```
+
+
+### search 1st connects and save to db and connect
+
+It's a API to backup already connected contacts to local DB(for old connections and connections not made through search_and_connect API)
+ 
+```python
+
+ session = LinkedinPy()
+
+ with smart_run(session):
+     session.search_1stconnects_and_savetodb(
+                    query="founder",
+                    city_code="%5B%22in%3A6508%22%5D",
+                    school_code="%5B%2213497%22%5D"
+                )
+ ```
+
+ 
  
 ## How to run:
 

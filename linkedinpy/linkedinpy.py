@@ -514,6 +514,60 @@ class LinkedinPy:
                     # dont_skip_business_categories = [] Setted by default
                     # in init
 
+    def search_1stconnects_and_savetodb(self,
+              query,
+              city_code,
+              school_code=None,
+              past_company=None,
+              random_start=True,
+              max_pages=10,
+              max_connects=25,
+              sleep_delay=6):
+        """ search linkedin and connect from a given profile """
+
+        print("Searching for: query={}, city_code={}, school_code={}".format(query, city_code, school_code))
+        search_url = "https://www.linkedin.com/search/results/people/?&facetNetwork=%5B%22F%22%5D"
+        if city_code:
+            search_url = search_url + "&facetGeoRegion=" + city_code
+        if school_code:
+            search_url = search_url + "&facetSchool=" + school_code
+        if past_company:
+            search_url = search_url + "&facetPastCompany=" + past_company
+
+        search_url = search_url + "&keywords=" + query
+        search_url = search_url + "&origin=" + "FACETED_SEARCH"
+
+        for page_no in range(1,101):
+            try:
+                temp_search_url = search_url + "&page=" + str(page_no)
+                web_address_navigator(Settings,self.browser, temp_search_url)
+                print("Starting page:", page_no)
+
+                for jc in range(2, 11):
+                    sleep(1)
+                    self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight/" + str(jc) + ");")
+
+                if len(self.browser.find_elements_by_css_selector("div.search-result__wrapper"))==0:
+                    print("============Last Page Reached or asking for Premium membership==============")
+                    break
+                for i in range(0, len(self.browser.find_elements_by_css_selector("div.search-result__wrapper"))):
+                    try:
+                        res_item = self.browser.find_elements_by_css_selector("li.search-result div.search-entity div.search-result__wrapper")[i]
+                        link = res_item.find_element_by_css_selector("div > a")
+                        profile_link = link.get_attribute("href")
+                        user_name = profile_link.split('/')[4]
+                        print("user_name : {}".format(user_name))
+                        msg_button = res_item.find_element_by_xpath("//div[3]/div/div/button[text()='Message']")
+                        print(msg_button.text, "present")
+                        if msg_button.text=="Message":
+                            connect_restriction("write", user_name, None, self.logger)
+                    except Exception as e:
+                        print(e)
+            except Exception as e:
+                print(e)
+            print("============Next Page==============")
+
+
     def search_and_connect(self,
               query,
               connection_relationship_code,
@@ -590,6 +644,11 @@ class LinkedinPy:
                         print("user_name : {}".format(user_name))
                         name = res_item.find_element_by_css_selector("h3 > span > span > span")#//span/span/span[1]")
                         print("Name : {}".format(name.text))
+
+                        if connect_restriction("read", user_name,  self.connect_times, self.logger):
+                            print("already connected")
+                            continue
+
                         try:
                             connect_button = res_item.find_element_by_xpath("//div[3]/div/button[text()='Connect']")
                             print("Connect button found, connecting...")
