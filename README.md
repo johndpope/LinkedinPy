@@ -2,6 +2,8 @@
 
 
 ## Installation:
+It is recomended to use via pyenv We will be supporting python 3.6.0 and above going forward
+
 ```
 pip install --upgrade pip
 curl https://pyenv.run | bash
