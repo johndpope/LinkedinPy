@@ -52,7 +52,6 @@ def get_database(Settings, make=False):
 
 def create_database(address, logger, name):
     try:
-        print("create_database")
         connection = sqlite3.connect(address)
         with connection:
             connection.row_factory = sqlite3.Row
@@ -77,7 +76,6 @@ def create_database(address, logger, name):
 
 
 def create_tables(cursor, tables):
-    print("create_tables")
     if "profiles" in tables:
         cursor.execute(SQL_CREATE_PROFILE_TABLE)
 

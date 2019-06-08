@@ -161,7 +161,7 @@ class LinkedinPy:
         # self.video_played = 0
         # self.already_Visited = 0
 
-        # self.connect_times = 1
+        self.connect_times = 1
         # self.do_connect = False
         # self.connect_percentage = 0
         # self.dont_include = set()
@@ -632,6 +632,7 @@ class LinkedinPy:
                         print(msg_button.text, "present")
                         if msg_button.text=="Message":
                             connect_restriction("write", user_name, None, self.logger)
+                            print("saved to db")
                     except Exception as e:
                         print(e)
             except Exception as e:
