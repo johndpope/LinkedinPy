@@ -16,7 +16,7 @@ import pprint as pp
 # from selenium import webdriver
 # from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.by import By
+# from selenium.webdriver.common.by import By
 
 from pyvirtualdisplay import Display
 import logging
@@ -726,7 +726,7 @@ class LinkedinPy:
                             self.browser.execute_script("var evt = document.createEvent('MouseEvents');" + "evt.initMouseEvent('click',true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);" + "arguments[0].dispatchEvent(evt);", res_item.find_element_by_xpath('//div[3]/div/button[text()="Connect"]'))
                             print("Clicked", connect_button.text)
                             sleep(2)
-                        except Exception as e:
+                        except Exception:
                             invite_sent_button = res_item.find_element_by_xpath("//div[3]/div/button[text()='Invite Sent']")
                             print("Already", invite_sent_button.text)
                             continue
@@ -769,7 +769,7 @@ class LinkedinPy:
                         except Exception as e:
                             print("Popup not found, Failed with:", e)
                             try:
-                                new_popup_buttons = find_elements_by_css_selector("#artdeco-modal-outlet div.artdeco-modal-overlay div.artdeco-modal div.artdeco-modal__actionbar button.artdeco-button")
+                                new_popup_buttons = self.browser.find_elements_by_css_selector("#artdeco-modal-outlet div.artdeco-modal-overlay div.artdeco-modal div.artdeco-modal__actionbar button.artdeco-button")
                                 gotit_button = new_popup_buttons[1]
                                 (ActionChains(self.browser)
                                  .move_to_element(gotit_button)

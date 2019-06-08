@@ -6,8 +6,8 @@ from linkedinpy import smart_run
 from socialcommons.file_manager import set_workspace
 from linkedinpy import settings
 
-import random
-import time
+# import random
+# import time
 import datetime
 now = datetime.datetime.now()
 

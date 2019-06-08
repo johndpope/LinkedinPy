@@ -1,25 +1,25 @@
 """ Common utilities """
-import time
+# import time
 # import datetime
 from math import ceil
 # from math import radians
 # from math import degrees as rad2deg
 # from math import cos
-import random
+# import random
 import re
 # import regex
 import signal
-import os
-import sys
-from sys import exit as clean_exit
+# import os
+# import sys
+# from sys import exit as clean_exit
 # from platform import system
 from platform import python_version
 # from subprocess import call
 # import csv
 import sqlite3
-import json
+# import json
 from contextlib import contextmanager
-from tempfile import gettempdir
+# from tempfile import gettempdir
 # import emoji
 # from emoji.unicode_codes import UNICODE_EMOJI
 from argparse import ArgumentParser
@@ -32,7 +32,7 @@ from socialcommons.time_util import sleep
 from socialcommons.time_util import sleep_actual
 from .database_engine import get_database
 from socialcommons.quota_supervisor import quota_supervisor
-# from .settings import Settings
+from .settings import Settings
 # from .settings import Selectors
 
 from selenium.common.exceptions import NoSuchElementException
@@ -2149,7 +2149,7 @@ def parse_cli_args():
 #     return bbox
 
 
-# class CustomizedArgumentParser(ArgumentParser):
+class CustomizedArgumentParser(ArgumentParser):
     """
      Subclass ArgumentParser in order to turn off
     the abbreviation matching on older pythons.
