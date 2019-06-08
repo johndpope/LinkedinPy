@@ -25,7 +25,6 @@ pip install -r requirements.txt
 It sends invite to your 2nd or 3rd degree connections fetched from linkedin search
  
 ```python
-
  session = LinkedinPy()
 
  with smart_run(session):
@@ -41,7 +40,6 @@ It sends invite to your 2nd or 3rd degree connections fetched from linkedin sear
 It simply endorses your first connections fetched from linkedin search
 
 ```python
-
  session = LinkedinPy()
 
  with smart_run(session):
@@ -58,7 +56,6 @@ It simply endorses your first connections fetched from linkedin search
 It's a API to backup already connected contacts to local DB(for old connections and connections not made through search_and_connect API)
  
 ```python
-
  session = LinkedinPy()
 
  with smart_run(session):
@@ -74,15 +71,21 @@ It's a API to backup already connected contacts to local DB(for old connections 
 It's a API to withdraw invitation a month or more older
  
 ```python
-
  session = LinkedinPy()
 
  with smart_run(session):
     session.withdraw_old_invitations(skip_pages=5)
  ```
- 
- 
+
 ## How to run:
 
  -  modify `quickstart.py` according to your requirements
  -  `python quickstart.py -u <my_linkedin_username> -p <mypssword>`
+
+## How to schedule as a job:
+
+```bash
+    */10 * * * * bash /path/to/LinkedinPy/run_githubpy_only_once_for_mac.sh /path/to/LinkedinPy/quickstart.py $USERNAME $PASSWORD
+```
+
+
