@@ -7,6 +7,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+run_linkedinpy_only_once_for_mac_headed.sh
+
 docker_quickstart.py
 
 # C extensions

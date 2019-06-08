@@ -1,39 +1,39 @@
 """ Module which handles the connect features like unconnecting and connecting """
-from datetime import datetime, timedelta
+# from datetime import datetime, timedelta
 import time
 import os
 import random
 import json
-import csv
+# import csv
 import sqlite3
 from math import ceil
 
 from socialcommons.time_util import sleep
-from .util import delete_line_from_file
+# from .util import delete_line_from_file
 from .util import update_activity
-from .util import add_user_to_blacklist
+# from .util import add_user_to_blacklist
 from .util import click_element
 from .util import web_address_navigator
 from .util import get_relationship_counts
-from .util import emergency_exit
-from .util import is_page_available
-from .util import click_visibly
-from .util import get_action_delay
+# from .util import emergency_exit
+# from .util import is_page_available
+# from .util import click_visibly
+# from .util import get_action_delay
 from .util import truncate_float
-from .print_log_writer import log_connected_pool
-from .print_log_writer import log_uncertain_unconnected_pool
-from .print_log_writer import log_record_all_unconnected
+# from .print_log_writer import log_connected_pool
+# from .print_log_writer import log_uncertain_unconnected_pool
+# from .print_log_writer import log_record_all_unconnected
 # from socialcommons.relationship_tools import get_connecters
 # from socialcommons.relationship_tools import get_nonconnecters
 from .database_engine import get_database
 from socialcommons.quota_supervisor import quota_supervisor
-from .util import is_connect_me
-from .util import get_epoch_time_diff
+# from .util import is_connect_me
+# from .util import get_epoch_time_diff
 from .settings import Settings
 
 from selenium.common.exceptions import WebDriverException
 from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import ElementNotVisibleException
+# from selenium.common.exceptions import ElementNotVisibleException
 
 # def unconnect(browser,
 #              username,
@@ -513,170 +513,170 @@ from selenium.common.exceptions import ElementNotVisibleException
 #     return unconnectNum
 
 
-def connect_user(browser, track, login, user_name, button, blacklist, logger,
-                logfolder):
-    """ connect a user either from the profile page or post page or dialog
-    box """
-    # list of available tracks to connect in: ["profile", "post" "dialog"]
+# def connect_user(browser, track, login, user_name, button, blacklist, logger,
+#                 logfolder):
+#     """ connect a user either from the profile page or post page or dialog
+#     box """
+#     # list of available tracks to connect in: ["profile", "post" "dialog"]
 
-    # check action availability
-    if quota_supervisor(Settings, "connects") == "jump":
-        return False, "jumped"
+#     # check action availability
+#     if quota_supervisor(Settings, "connects") == "jump":
+#         return False, "jumped"
 
-    if track in ["profile", "post"]:
-        if track == "profile":
-            # check URL of the webpage, if it already is user's profile
-            # page, then do not navigate to it again
-            user_link = "https://www.instagram.com/{}/".format(user_name)
-            web_address_navigator(Settings,browser, user_link)
+#     if track in ["profile", "post"]:
+#         if track == "profile":
+#             # check URL of the webpage, if it already is user's profile
+#             # page, then do not navigate to it again
+#             user_link = "https://www.instagram.com/{}/".format(user_name)
+#             web_address_navigator(Settings,browser, user_link)
 
-        # find out CURRENT connecting status
-        connecting_status, connect_button = get_connecting_status(browser,
-                                                               track,
-                                                               login,
-                                                               user_name,
-                                                               None,
-                                                               logger,
-                                                               logfolder)
-        if connecting_status in ["connect", "connect Back"]:
-            click_visibly(browser, connect_button)  # click to connect
-            connect_state, msg = verify_action(browser, "connect", track, login,
-                                              user_name, None, logger,
-                                              logfolder)
-            if connect_state is not True:
-                return False, msg
+#         # find out CURRENT connecting status
+#         connecting_status, connect_button = get_connecting_status(browser,
+#                                                                track,
+#                                                                login,
+#                                                                user_name,
+#                                                                None,
+#                                                                logger,
+#                                                                logfolder)
+#         if connecting_status in ["connect", "connect Back"]:
+#             click_visibly(browser, connect_button)  # click to connect
+#             connect_state, msg = verify_action(browser, "connect", track, login,
+#                                               user_name, None, logger,
+#                                               logfolder)
+#             if connect_state is not True:
+#                 return False, msg
 
-        elif connecting_status in ["connecting", "Requested"]:
-            if connecting_status == "connecting":
-                logger.info("--> Already connecting '{}'!\n".format(user_name))
+#         elif connecting_status in ["connecting", "Requested"]:
+#             if connecting_status == "connecting":
+#                 logger.info("--> Already connecting '{}'!\n".format(user_name))
 
-            elif connecting_status == "Requested":
-                logger.info("--> Already requested '{}' to connect!\n".format(
-                    user_name))
+#             elif connecting_status == "Requested":
+#                 logger.info("--> Already requested '{}' to connect!\n".format(
+#                     user_name))
 
-            sleep(1)
-            return False, "already connected"
+#             sleep(1)
+#             return False, "already connected"
 
-        elif connecting_status in ["Unblock", "UNAVAILABLE"]:
-            if connecting_status == "Unblock":
-                failure_msg = "user is in block"
+#         elif connecting_status in ["Unblock", "UNAVAILABLE"]:
+#             if connecting_status == "Unblock":
+#                 failure_msg = "user is in block"
 
-            elif connecting_status == "UNAVAILABLE":
-                failure_msg = "user is inaccessible"
+#             elif connecting_status == "UNAVAILABLE":
+#                 failure_msg = "user is inaccessible"
 
-            logger.warning(
-                "--> Couldn't connect '{}'!\t~{}".format(user_name,
-                                                        failure_msg))
-            return False, connecting_status
+#             logger.warning(
+#                 "--> Couldn't connect '{}'!\t~{}".format(user_name,
+#                                                         failure_msg))
+#             return False, connecting_status
 
-        elif connecting_status is None:
-            sirens_wailing, emergency_state = emergency_exit(browser, login,
-                                                             logger)
-            if sirens_wailing is True:
-                return False, emergency_state
+#         elif connecting_status is None:
+#             sirens_wailing, emergency_state = emergency_exit(browser, login,
+#                                                              logger)
+#             if sirens_wailing is True:
+#                 return False, emergency_state
 
-            else:
-                logger.warning(
-                    "--> Couldn't unconnect '{}'!\t~unexpected failure".format(
-                        user_name))
-                return False, "unexpected failure"
-    elif track == "dialog":
-        click_element(browser, button)
-        sleep(3)
+#             else:
+#                 logger.warning(
+#                     "--> Couldn't unconnect '{}'!\t~unexpected failure".format(
+#                         user_name))
+#                 return False, "unexpected failure"
+#     elif track == "dialog":
+#         click_element(browser, button)
+#         sleep(3)
 
-    # general tasks after a successful connect
-    logger.info("--> connected '{}'!".format(user_name.encode("utf-8")))
-    update_activity('connects')
+#     # general tasks after a successful connect
+#     logger.info("--> connected '{}'!".format(user_name.encode("utf-8")))
+#     update_activity('connects')
 
-    # get user ID to record alongside username
-    user_id = get_user_id(browser, track, user_name, logger)
+#     # get user ID to record alongside username
+#     user_id = get_user_id(browser, track, user_name, logger)
 
-    logtime = datetime.now().strftime('%Y-%m-%d %H:%M')
-    log_connected_pool(login, user_name, logger, logfolder, logtime, user_id)
+#     logtime = datetime.now().strftime('%Y-%m-%d %H:%M')
+#     log_connected_pool(login, user_name, logger, logfolder, logtime, user_id)
 
-    connect_restriction("write", user_name, None, logger)
+#     connect_restriction("write", user_name, None, logger)
 
-    if blacklist['enabled'] is True:
-        action = 'connected'
-        add_user_to_blacklist(user_name,
-                              blacklist['campaign'],
-                              action,
-                              logger,
-                              logfolder)
+#     if blacklist['enabled'] is True:
+#         action = 'connected'
+#         add_user_to_blacklist(user_name,
+#                               blacklist['campaign'],
+#                               action,
+#                               logger,
+#                               logfolder)
 
-    # get the post-connect delay time to sleep
-    naply = get_action_delay("connect")
-    sleep(naply)
+#     # get the post-connect delay time to sleep
+#     naply = get_action_delay("connect")
+#     sleep(naply)
 
-    return True, "success"
+#     return True, "success"
 
-def connect_through_dialog(browser,
-                          login,
-                          person_list,
-                          buttons,
-                          amount,
-                          dont_include,
-                          blacklist,
-                          connect_times,
-                          jumps,
-                          logger,
-                          logfolder):
-    """ Will connect username directly inside a dialog box """
-    if not isinstance(person_list, list):
-        person_list = [person_list]
+# def connect_through_dialog(browser,
+#                           login,
+#                           person_list,
+#                           buttons,
+#                           amount,
+#                           dont_include,
+#                           blacklist,
+#                           connect_times,
+#                           jumps,
+#                           logger,
+#                           logfolder):
+#     """ Will connect username directly inside a dialog box """
+#     if not isinstance(person_list, list):
+#         person_list = [person_list]
 
-    if not isinstance(buttons, list):
-        buttons = [buttons]
+#     if not isinstance(buttons, list):
+#         buttons = [buttons]
 
-    person_connected = []
-    connectNum = 0
+#     person_connected = []
+#     connectNum = 0
 
-    try:
-        for person, button in zip(person_list, buttons):
-            if connectNum >= amount:
-                logger.info("--> Total connect number reached: {}"
-                            .format(connectNum))
-                break
+#     try:
+#         for person, button in zip(person_list, buttons):
+#             if connectNum >= amount:
+#                 logger.info("--> Total connect number reached: {}"
+#                             .format(connectNum))
+#                 break
 
-            elif jumps["consequent"]["connects"] >= jumps["limit"]["connects"]:
-                logger.warning(
-                    "--> connect quotient reached its peak!\t~leaving "
-                    "connect-Through-Dialog activity\n")
-                break
+#             elif jumps["consequent"]["connects"] >= jumps["limit"]["connects"]:
+#                 logger.warning(
+#                     "--> connect quotient reached its peak!\t~leaving "
+#                     "connect-Through-Dialog activity\n")
+#                 break
 
-            if (person not in dont_include and
-                    not connect_restriction("read", person, connect_times,
-                                           logger)):
-                connect_state, msg = connect_user(browser,
-                                                "dialog",
-                                                login,
-                                                person,
-                                                button,
-                                                blacklist,
-                                                logger,
-                                                logfolder)
-                if connect_state is True:
-                    # register this session's connected user for further
-                    # interaction
-                    person_connected.append(person)
-                    connectNum += 1
-                    # reset jump counter after a successful connect
-                    jumps["consequent"]["connects"] = 0
+#             if (person not in dont_include and
+#                     not connect_restriction("read", person, connect_times,
+#                                            logger)):
+#                 connect_state, msg = connect_user(browser,
+#                                                 "dialog",
+#                                                 login,
+#                                                 person,
+#                                                 button,
+#                                                 blacklist,
+#                                                 logger,
+#                                                 logfolder)
+#                 if connect_state is True:
+#                     # register this session's connected user for further
+#                     # interaction
+#                     person_connected.append(person)
+#                     connectNum += 1
+#                     # reset jump counter after a successful connect
+#                     jumps["consequent"]["connects"] = 0
 
-                elif msg == "jumped":
-                    # will break the loop after certain consecutive jumps
-                    jumps["consequent"]["connects"] += 1
+#                 elif msg == "jumped":
+#                     # will break the loop after certain consecutive jumps
+#                     jumps["consequent"]["connects"] += 1
 
-            else:
-                logger.info(
-                    "Not connected '{}'  ~inappropriate user".format(person))
+#             else:
+#                 logger.info(
+#                     "Not connected '{}'  ~inappropriate user".format(person))
 
-    except BaseException as e:
-        logger.error(
-            "Error occurred while connecting through dialog box:\n{}".format(
-                str(e)))
+#     except BaseException as e:
+#         logger.error(
+#             "Error occurred while connecting through dialog box:\n{}".format(
+#                 str(e)))
 
-    return person_connected
+#     return person_connected
 
 
 def dump_connect_restriction(profile_name, logger, logfolder):

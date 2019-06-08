@@ -20,7 +20,6 @@ session = LinkedinPy()#use_firefox=True)
 with smart_run(session):
     """ Activity flow """
     # general settings
-    session.set_dont_include(["friend1", "friend2", "friend3"])
     session.set_quota_supervisor(settings.Settings,
         enabled=True,
         sleep_after=["server_calls_h"],
