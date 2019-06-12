@@ -632,7 +632,7 @@ class LinkedinPy:
                         print(msg_button.text, "present")
                         if msg_button.text=="Message":
                             connect_restriction("write", user_name, None, self.logger)
-                            print("saved to db")
+                            print("saved {} to db".format(user_name))
                     except Exception as e:
                         print(e)
             except Exception as e:
@@ -695,12 +695,13 @@ class LinkedinPy:
 
             try:
                 temp_search_url = search_url + "&page=" + str(page_no)
-                web_address_navigator(Settings,self.browser, temp_search_url)
+                if page_no > st and st > 1:
+	                web_address_navigator(Settings,self.browser, temp_search_url)
                 print("Starting page:", page_no)
 
                 for jc in range(2, 11):
                     sleep(1)
-                    self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight/" + str(jc) + ");")
+                    self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight/" + str(jc) + "-100);")
 
                 if len(self.browser.find_elements_by_css_selector("div.search-result__wrapper"))==0:
                     print("============Last Page Reached or asking for Premium membership==============")
@@ -736,13 +737,16 @@ class LinkedinPy:
                             modal = self.browser.find_element_by_css_selector("div.modal-wormhole-content > div")
                             if modal:
                                 try:
-                                    send_button = modal.find_element_by_xpath("//div[1]/div/section/div/div[2]/button[text()='Send now']")                                    
-                                    if send_button.is_enabled():
+                                    sendnow_or_done_button = modal.find_element_by_xpath("//div[1]/div/section/div/div[2]/button[2]")#text()='Send now']")
+                                    print(sendnow_or_done_button.text)
+                                    if not (sendnow_or_done_button.text=='Done' or sendnow_or_done_button.text=='Send now'):
+                                        raise Exception("Send Now or Done button not found")
+                                    if sendnow_or_done_button.is_enabled():
                                         (ActionChains(self.browser)
-                                         .move_to_element(send_button)
+                                         .move_to_element(sendnow_or_done_button)
                                          .click()
                                          .perform())
-                                        print("Clicked", send_button.text)
+                                        print("Clicked", sendnow_or_done_button.text)
                                         connects = connects + 1
                                         connect_restriction("write", user_name, None, self.logger)
                                         try:
@@ -759,12 +763,12 @@ class LinkedinPy:
                                              .move_to_element(close_button)
                                              .click()
                                              .perform())
-                                            print(send_button.text, "disabled, clicked close")
+                                            print(sendnow_or_done_button.text, "disabled, clicked close")
                                             sleep(2)
                                         except Exception as e:
                                             print("close_button not found, Failed with:", e)
                                 except Exception as e:
-                                    print("send_button not found, Failed with:", e)
+                                    print("sendnow_or_done_button not found, Failed with:", e)
                             else:
                                 print("Popup not found")
                         except Exception as e:
@@ -871,12 +875,13 @@ class LinkedinPy:
             collected_profile_links = []
             try:
                 temp_search_url = search_url + "&page=" + str(page_no)
-                web_address_navigator(Settings,self.browser, temp_search_url)
+                if page_no > st and st > 1:
+	                web_address_navigator(Settings,self.browser, temp_search_url)
                 print("Starting page:", page_no)
 
                 for jc in range(2, 11):
                     sleep(1)
-                    self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight/" + str(jc) + ");")
+                    self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight/" + str(jc) + "-100);")
 
                 result_items = self.browser.find_elements_by_css_selector("div.search-result__wrapper")
 
