@@ -53,7 +53,7 @@ It simply endorses your first connections fetched from linkedin search
 
 ### search 1st connects and save to db
 
-It's a API to backup already connected contacts to local DB(for old connections and connections not made through search_and_connect API)
+It's an API to backup already connected contacts to local DB(for old connections and connections not made through search_and_connect API)
  
 ```python
  session = LinkedinPy()
@@ -68,7 +68,7 @@ It's a API to backup already connected contacts to local DB(for old connections 
 
 ### withdraw old invitations
 
-It's a API to withdraw invitation a month or more older
+It's an API to withdraw invitation a month or more older
  
 ```python
  session = LinkedinPy()
