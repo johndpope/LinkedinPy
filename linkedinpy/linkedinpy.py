@@ -86,7 +86,6 @@ class LinkedinPy:
 
         cli_args = parse_cli_args()
         username = cli_args.username or username
-        # userid = cli_args.userid or userid
         password = cli_args.password or password
         use_firefox = cli_args.use_firefox or use_firefox
         page_delay = cli_args.page_delay or page_delay
@@ -97,9 +96,6 @@ class LinkedinPy:
         bypass_suspicious_attempt = (
             cli_args.bypass_suspicious_attempt or bypass_suspicious_attempt)
         bypass_with_mobile = cli_args.bypass_with_mobile or bypass_with_mobile
-
-        # IS_RUNNING = True
-        # workspace must be ready before anything
         if not get_workspace(Settings):
             raise SocialPyError(
                 "Oh no! I don't have a workspace to work at :'(")
@@ -121,11 +117,6 @@ class LinkedinPy:
 
         self.username = username or os.environ.get('LINKEDIN_USER')
         self.password = password or os.environ.get('LINKEDIN_PW')
-
-        # self.userid = userid
-        # if not self.userid:
-        #     self.userid = self.username.split('@')[0]
-
         Settings.profile["name"] = self.username
 
         self.page_delay = page_delay
@@ -133,19 +124,6 @@ class LinkedinPy:
         self.use_firefox = use_firefox
         Settings.use_firefox = self.use_firefox
         self.browser_profile_path = browser_profile_path
-
-        # self.do_comment = False
-        # self.comment_percentage = 0
-        # self.comments = ['Cool!', 'Nice!', 'Looks good!']
-        # self.photo_comments = []
-        # self.video_comments = []
-
-        # self.do_reply_to_comments = False
-        # self.reply_to_comments_percent = 0
-        # self.comment_replies = []
-        # self.photo_comment_replies = []
-        # self.video_comment_replies = []
-
         self.liked_img = 0
         self.already_liked = 0
         self.liked_comments = 0
@@ -158,99 +136,7 @@ class LinkedinPy:
         self.connecting_num = 0
         self.inap_img = 0
         self.not_valid_users = 0
-        # self.video_played = 0
-        # self.already_Visited = 0
-
         self.connect_times = 1
-        # self.do_connect = False
-        # self.connect_percentage = 0
-        # self.dont_include = set()
-        # self.white_list = set()
-        # self.blacklist = {'enabled': 'True', 'campaign': ''}
-        # self.automatedConnectedPool = {"all": [], "eligible": []}
-        # self.do_like = False
-        # self.like_percentage = 0
-        # self.smart_hashtags = []
-
-        # self.dont_like = ['sex', 'nsfw']
-        # self.mandatory_words = []
-        # self.ignore_if_contains = []
-        # self.ignore_users = []
-
-        # self.user_interact_amount = 0
-        # self.user_interact_media = None
-        # self.user_interact_percentage = 0
-        # self.user_interact_random = False
-        # self.dont_connect_inap_post = True
-
-        # self.use_clarifai = False
-        # self.clarifai_api_key = None
-        # self.clarifai_models = []
-        # self.clarifai_workflow = []
-        # self.clarifai_probability = 0.50
-        # self.clarifai_img_tags = []
-        # self.clarifai_img_tags_skip = []
-        # self.clarifai_full_match = False
-        # self.clarifai_check_video = False
-        # self.clarifai_proxy = None
-
-        # self.potency_ratio = None   # 1.3466
-        # self.delimit_by_numbers = None
-
-        # self.max_connecters = None   # 90000
-        # self.max_connecting = None   # 66834
-        # self.min_connecters = None   # 35
-        # self.min_connecting = None   # 27
-
-        # self.delimit_liking = False
-        # self.liking_approved = True
-        # self.max_likes = 1000
-        # self.min_likes = 0
-
-        # self.delimit_commenting = False
-        # self.commenting_approved = True
-        # self.max_comments = 35
-        # self.min_comments = 0
-        # self.comments_mandatory_words = []
-        # self.max_posts = None
-        # self.min_posts = None
-        # self.skip_business_categories = []
-        # self.dont_skip_business_categories = []
-        # self.skip_business = False
-        # self.skip_no_profile_pic = False
-        # self.skip_private = True
-        # self.skip_business_percentage = 100
-        # self.skip_no_profile_pic_percentage = 100
-        # self.skip_private_percentage = 100
-
-        # self.relationship_data = {
-        #     username: {"all_connecting": [], "all_connecters": []}}
-
-        # self.simulation = {"enabled": True, "percentage": 100}
-
-        # self.mandatory_language = False
-        # self.mandatory_character = []
-        # self.check_letters = {}
-
-        # use this variable to terminate the nested loops after quotient
-        # reaches
-        # self.quotient_breach = False
-        # hold the consecutive jumps and set max of it used with QS to break
-        # loops
-        # self.jumps = {"consequent": {"likes": 0, "comments": 0, "connects": 0,
-        #                              "unconnects": 0},
-        #               "limit": {"likes": 7, "comments": 3, "connects": 5,
-        #                         "unconnects": 4}}
-
-        # stores the features' name which are being used by other features
-        # self.internal_usage = {}
-
-        # if (
-        #         self.proxy_address and self.proxy_port > 0) or \
-        #         self.proxy_chrome_extension:
-            # Settings.connection_type = "proxy"
-
-        # self.aborting = False
         self.start_time = time.time()
 
         # assign logger
@@ -319,40 +205,6 @@ class LinkedinPy:
         if len(err_msg) > 0:
             raise SocialPyError(err_msg)
 
-    # def set_selenium_remote_session(self, selenium_url='',
-    #                                 selenium_driver=None):
-    #     """
-    #     Starts remote session for a selenium server.
-    #     Creates a new selenium driver instance for remote session or uses
-    #     provided
-    #     one. Useful for docker setup.
-
-    #     :param selenium_url: string
-    #     :param selenium_driver: selenium WebDriver
-    #     :return: self
-    #     """
-    #     if self.aborting:
-    #         return self
-
-    #     if selenium_driver:
-    #         self.browser = selenium_driver
-    #     else:
-    #         if self.use_firefox:
-    #             self.browser = webdriver.Remote(
-    #                 command_executor=selenium_url,
-    #                 desired_capabilities=DesiredCapabilities.FIREFOX)
-    #         else:
-    #             self.browser = webdriver.Remote(
-    #                 command_executor=selenium_url,
-    #                 desired_capabilities=DesiredCapabilities.CHROME)
-
-    #     message = "Session started!"
-    #     highlight_print(Settings, self.username, message, "initialization", "info",
-    #                     self.logger)
-    #     print('')
-
-    #     return self
-
     def login(self):
         """Used to login the user either with the username and password"""
         if not login_user(self.browser,
@@ -390,129 +242,6 @@ class LinkedinPy:
                 self.logger.warning(
                     'Unable to save account progress, skipping data update')
         return self
-
-    # def set_sleep_reduce(self, percentage):
-    #     set_sleep_percentage(percentage)
-    #     return self
-
-    # def set_action_delays(self,
-    #                       enabled=False,
-    #                       like=None,
-    #                       comment=None,
-    #                       connect=None,
-    #                       unconnect=None,
-    #                       randomize=False,
-    #                       random_range=(None, None),
-    #                       safety_match=True):
-    #     """ Set custom sleep delay after actions """
-    #     Settings.action_delays.update({"enabled": enabled,
-    #                                    "like": like,
-    #                                    "comment": comment,
-    #                                    "connect": connect,
-    #                                    "unconnect": unconnect,
-    #                                    "randomize": randomize,
-    #                                    "random_range": random_range,
-    #                                    "safety_match": safety_match})
-
-
-
-    # def set_dont_include(self, friends=None):
-    #     """Defines which accounts should not be unconnected"""
-    #     if self.aborting:
-    #         return self
-
-    #     # self.dont_include = set(friends) or set()
-    #     # self.white_list = set(friends) or set()
-
-    #     return self
-
-    # def set_relationship_bounds(self,
-    #                             enabled=None,
-    #                             potency_ratio=None,
-    #                             delimit_by_numbers=None,
-    #                             min_posts=None,
-    #                             max_posts=None,
-    #                             max_connecters=None,
-    #                             max_connecting=None,
-    #                             min_connecters=None,
-    #                             min_connecting=None):
-    #     """Sets the potency ratio and limits to the provide an efficient
-    #     activity between the targeted masses"""
-
-    #     self.potency_ratio = potency_ratio if enabled is True else None
-    #     self.delimit_by_numbers = delimit_by_numbers if enabled is True else \
-    #         None
-
-    #     self.max_connecters = max_connecters
-    #     self.min_connecters = min_connecters
-
-    #     self.max_connecting = max_connecting
-    #     self.min_connecting = min_connecting
-
-    #     self.min_posts = min_posts if enabled is True else None
-    #     self.max_posts = max_posts if enabled is True else None
-
-    # def validate_user_call(self, user_name):
-    #     """ Short call of validate_username() function """
-    #     validation, details = \
-    #         validate_username(self.browser,
-    #                         "https://linkedin.com/",
-    #                         user_name,
-    #                         self.username,
-    #                         self.userid,
-    #                         self.ignore_users,
-    #                         self.blacklist,
-    #                         self.potency_ratio,
-    #                         self.delimit_by_numbers,
-    #                         self.max_connecters,
-    #                         self.max_connecting,
-    #                         self.min_connecters,
-    #                         self.min_connecting,
-    #                         self.min_posts,
-    #                         self.max_posts,
-    #                         self.skip_private,
-    #                         self.skip_private_percentage,
-    #                         self.skip_no_profile_pic,
-    #                         self.skip_no_profile_pic_percentage,
-    #                         self.skip_business,
-    #                         self.skip_business_percentage,
-    #                         self.skip_business_categories,
-    #                         self.dont_skip_business_categories,
-    #                         self.logger,
-    #                         self.logfolder, Settings)
-    #     return validation, details
-
-    # def set_skip_users(self,
-    #                    skip_private=True,
-    #                    private_percentage=100,
-    #                    skip_no_profile_pic=False,
-    #                    no_profile_pic_percentage=100,
-    #                    skip_business=False,
-    #                    business_percentage=100,
-    #                    skip_business_categories=[],
-    #                    dont_skip_business_categories=[]):
-
-    #     self.skip_business = skip_business
-    #     self.skip_private = skip_private
-    #     self.skip_no_profile_pic = skip_no_profile_pic
-    #     self.skip_business_percentage = business_percentage
-    #     self.skip_no_profile_pic_percentage = no_profile_pic_percentage
-    #     self.skip_private_percentage = private_percentage
-    #     if skip_business:
-    #         self.skip_business_categories = skip_business_categories
-    #         if len(skip_business_categories) == 0:
-    #             self.dont_skip_business_categories = \
-    #                 dont_skip_business_categories
-    #         else:
-    #             if len(dont_skip_business_categories) != 0:
-    #                 self.logger.warning(
-    #                     "Both skip_business_categories and "
-    #                     "dont_skip_business categories provided in "
-    #                     "skip_business feature," +
-    #                     "will skip only the categories listed in "
-    #                     "skip_business_categories parameter")
-    #                 # dont_skip_business_categories = [] Setted by default
-    #                 # in init
 
     def withdraw_old_invitations(self,
             skip_pages=10,
@@ -1073,22 +802,6 @@ class LinkedinPy:
                 self.logger.warning("Quota Supervisor: peak rates are misfit! "
                                     "Please use supported formats."
                                     "\t~disabled QS")
-
-    # @contextmanager
-    # def feature_in_feature(self, feature, validate_users):
-    #     """
-    #      Use once a host feature calls a guest
-    #     feature WHERE guest needs special behaviour(s)
-    #     """
-
-    #     try:
-    #         # add the guest which is gonna be used by the host :)
-    #         self.internal_usage[feature] = {"validate": validate_users}
-    #         yield
-
-    #     finally:
-    #         # remove the guest just after using it
-    #         self.internal_usage.pop(feature)
 
     def live_report(self):
         """ Report live sessional statistics """
