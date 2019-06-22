@@ -264,14 +264,14 @@ class LinkedinPy:
                             link = res_item.find_element_by_css_selector("div > a")
                             profile_link = link.get_attribute("href")
                             user_name = profile_link.split('/')[4]
-                            print("user_name : {}".format(user_name))
+                            self.logger.info("user_name : {}".format(user_name))
                         except Exception as e:
                             print("Might be a stale profile", e)
                         time = res_item.find_element_by_css_selector("div > time")
-                        print("time : {}".format(time.text))
+                        self.logger.info("time : {}".format(time.text))
                         check_button = res_item.find_element_by_css_selector("div > div:nth-child(1) > input")
                         check_status = check_button.get_attribute("data-artdeco-is-focused")
-                        print("check_status : {}".format(check_status))
+                        self.logger.info("check_status : {}".format(check_status))
 
                         self.browser.execute_script("window.scrollTo(0, " + str((i+1)*104) + ");")
 
@@ -280,26 +280,26 @@ class LinkedinPy:
                              .move_to_element(check_button)
                              .click()
                              .perform())
-                            print("check_button clicked")
+                            self.logger.info("check_button clicked")
                             checked_in_page = checked_in_page + 1
                             delay_random = random.randint(
                                         ceil(sleep_delay * 0.42),
                                         ceil(sleep_delay * 0.57))
                             sleep(delay_random)
                     except Exception as e:
-                        print(e)
+                        self.logger.error(e)
                 if checked_in_page > 0:
-                    print("Widraw to be pressed")
+                    self.logger.info("Widraw to be pressed")
                     try:
                         self.browser.execute_script("window.scrollTo(0, 0);")
                         withdraw_button = self.browser.find_element_by_css_selector("ul > li.mn-list-toolbar__right-button > button")
-                        print("withdraw_button : {}".format(withdraw_button.text))
+                        self.logger.info("withdraw_button : {}".format(withdraw_button.text))
                         if "Withdraw" in withdraw_button.text:
                             (ActionChains(self.browser)
                              .move_to_element(withdraw_button)
                              .click()
                              .perform())
-                            print("withdraw_button clicked")
+                            self.logger.info("withdraw_button clicked")
                             page_no = page_no - 1
                             delay_random = random.randint(
                                         ceil(sleep_delay * 0.85),
@@ -308,10 +308,10 @@ class LinkedinPy:
                     except Exception as e:
                         print("For some reason there is no withdraw_button inspite of checkings", e)
                 else:
-                    print("Nothing checked in this page")
+                    self.logger.info("Nothing checked in this page")
             except Exception as e:
-                print(e)
-            print("============Next Page==============")
+                self.logger.error(e)
+            self.logger.info("============Next Page==============")
 
 
     def search_1stconnects_and_savetodb(self,
@@ -325,7 +325,7 @@ class LinkedinPy:
               sleep_delay=6):
         """ search linkedin and connect from a given profile """
 
-        print("Searching for: query={}, city_code={}, school_code={}".format(query, city_code, school_code))
+        self.logger.info("Searching for: query={}, city_code={}, school_code={}".format(query, city_code, school_code))
         search_url = "https://www.linkedin.com/search/results/people/?&facetNetwork=%5B%22F%22%5D"
         if city_code:
             search_url = search_url + "&facetGeoRegion=" + city_code
@@ -341,14 +341,14 @@ class LinkedinPy:
             try:
                 temp_search_url = search_url + "&page=" + str(page_no)
                 web_address_navigator(Settings,self.browser, temp_search_url)
-                print("Starting page:", page_no)
+                self.logger.info("Starting page: {}".format(page_no))
 
                 for jc in range(2, 11):
                     sleep(1)
                     self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight/" + str(jc) + ");")
 
                 if len(self.browser.find_elements_by_css_selector("div.search-result__wrapper"))==0:
-                    print("============Last Page Reached or asking for Premium membership==============")
+                    self.logger.info("============Last Page Reached or asking for Premium membership==============")
                     break
                 for i in range(0, len(self.browser.find_elements_by_css_selector("div.search-result__wrapper"))):
                     try:
@@ -356,17 +356,17 @@ class LinkedinPy:
                         link = res_item.find_element_by_css_selector("div > a")
                         profile_link = link.get_attribute("href")
                         user_name = profile_link.split('/')[4]
-                        print("user_name : {}".format(user_name))
+                        self.logger.info("user_name : {}".format(user_name))
                         msg_button = res_item.find_element_by_xpath("//div[3]/div/div/button[text()='Message']")
                         print(msg_button.text, "present")
                         if msg_button.text=="Message":
                             connect_restriction("write", user_name, None, self.logger)
-                            print("saved {} to db".format(user_name))
+                            self.logger.info("saved {} to db".format(user_name))
                     except Exception as e:
-                        print(e)
+                        self.logger.error(e)
             except Exception as e:
-                print(e)
-            print("============Next Page==============")
+                self.logger.error(e)
+            self.logger.info("============Next Page==============")
 
 
     def search_and_connect(self,
@@ -384,7 +384,7 @@ class LinkedinPy:
         if quota_supervisor(Settings, "connects") == "jump":
             return #False, "jumped"
 
-        print("Searching for: query={}, connection_relationship_code={}, city_code={}, school_code={}".format(query, connection_relationship_code, city_code, school_code))
+        self.logger.info("Searching for: query={}, connection_relationship_code={}, city_code={}, school_code={}".format(query, connection_relationship_code, city_code, school_code))
         connects = 0
         prev_connects = -1
         search_url = "https://www.linkedin.com/search/results/people/?"
@@ -407,7 +407,7 @@ class LinkedinPy:
                 st = random.randint(1, st-1)
                 temp_search_url = search_url + "&page=" + str(st)
                 web_address_navigator(Settings,self.browser, temp_search_url)
-                print("Testing page:", st)
+                self.logger.info("Testing page: {}".format(st))
                 if len(self.browser.find_elements_by_css_selector("div.search-result__wrapper")) > 0:
                     break
                 trial = trial + 1
@@ -417,7 +417,7 @@ class LinkedinPy:
         for page_no in list(range(st, st + max_pages)):
 
             if prev_connects==connects:
-                print("============Limits might have exceeded or all Invites pending from this page(let's exit either case)==============")
+                self.logger.info("============Limits might have exceeded or all Invites pending from this page(let's exit either case)==============")
                 break
             else:
                 prev_connects = connects
@@ -426,14 +426,14 @@ class LinkedinPy:
                 temp_search_url = search_url + "&page=" + str(page_no)
                 if page_no > st and st > 1:
 	                web_address_navigator(Settings,self.browser, temp_search_url)
-                print("Starting page:", page_no)
+                self.logger.info("Starting page: {}".format(page_no))
 
                 for jc in range(2, 11):
                     sleep(1)
                     self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight/" + str(jc) + "-100);")
 
                 if len(self.browser.find_elements_by_css_selector("div.search-result__wrapper"))==0:
-                    print("============Last Page Reached or asking for Premium membership==============")
+                    self.logger.info("============Last Page Reached or asking for Premium membership==============")
                     break
                 for i in range(0, len(self.browser.find_elements_by_css_selector("div.search-result__wrapper"))):
                     try:
@@ -441,25 +441,25 @@ class LinkedinPy:
                         pp.pprint(res_item.get_attribute('innerHTML'))
                         link = res_item.find_element_by_css_selector("div > a")
                         profile_link = link.get_attribute("href")
-                        print("Profile : {}".format(profile_link))
+                        self.logger.info("Profile : {}".format(profile_link))
                         user_name = profile_link.split('/')[4]
-                        print("user_name : {}".format(user_name))
+                        self.logger.info("user_name : {}".format(user_name))
                         name = res_item.find_element_by_css_selector("h3 > span > span > span")#//span/span/span[1]")
-                        print("Name : {}".format(name.text))
+                        self.logger.info("Name : {}".format(name.text))
 
                         if connect_restriction("read", user_name,  self.connect_times, self.logger):
-                            print("already connected")
+                            self.logger.info("already connected")
                             continue
 
                         try:
                             connect_button = res_item.find_element_by_xpath("//div[3]/div/button[text()='Connect']")
-                            print("Connect button found, connecting...")
+                            self.logger.info("Connect button found, connecting...")
                             self.browser.execute_script("var evt = document.createEvent('MouseEvents');" + "evt.initMouseEvent('click',true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);" + "arguments[0].dispatchEvent(evt);", res_item.find_element_by_xpath('//div[3]/div/button[text()="Connect"]'))
-                            print("Clicked", connect_button.text)
+                            self.logger.info("Clicked {}".format(connect_button.text))
                             sleep(2)
                         except Exception:
                             invite_sent_button = res_item.find_element_by_xpath("//div[3]/div/button[text()='Invite Sent']")
-                            print("Already", invite_sent_button.text)
+                            self.logger.info("Already {}".format(invite_sent_button.text))
                             continue
 
                         try:
@@ -467,7 +467,7 @@ class LinkedinPy:
                             if modal:
                                 try:
                                     sendnow_or_done_button = modal.find_element_by_xpath("//div[1]/div/section/div/div[2]/button[2]")#text()='Send now']")
-                                    print(sendnow_or_done_button.text)
+                                    self.logger.info(sendnow_or_done_button.text)
                                     if not (sendnow_or_done_button.text=='Done' or sendnow_or_done_button.text=='Send now'):
                                         raise Exception("Send Now or Done button not found")
                                     if sendnow_or_done_button.is_enabled():
@@ -475,14 +475,14 @@ class LinkedinPy:
                                          .move_to_element(sendnow_or_done_button)
                                          .click()
                                          .perform())
-                                        print("Clicked", sendnow_or_done_button.text)
+                                        self.logger.info("Clicked {}".format(sendnow_or_done_button.text))
                                         connects = connects + 1
                                         connect_restriction("write", user_name, None, self.logger)
                                         try:
                                             # update server calls
                                             update_activity(Settings, 'connects')
                                         except Exception as e:
-                                            print(e)
+                                            self.logger.error(e)
                                         sleep(2)
                                     else:
                                         try:
@@ -499,7 +499,7 @@ class LinkedinPy:
                                 except Exception as e:
                                     print("sendnow_or_done_button not found, Failed with:", e)
                             else:
-                                print("Popup not found")
+                                self.logger.info("Popup not found")
                         except Exception as e:
                             print("Popup not found, Failed with:", e)
                             try:
@@ -514,19 +514,19 @@ class LinkedinPy:
                             except Exception as e:
                                 print("New Popup also not found, Failed with:", e)
 
-                        print("Connects sent in this iteration: {}".format(connects))
+                        self.logger.info("Connects sent in this iteration: {}".format(connects))
                         delay_random = random.randint(
                                     ceil(sleep_delay * 0.85),
                                     ceil(sleep_delay * 1.14))
                         sleep(delay_random)
                         if connects >= max_connects:
-                            print("max_connects({}) for this iteration reached , Returning...".format(max_connects))
+                            self.logger.info("max_connects({}) for this iteration reached , Returning...".format(max_connects))
                             return
                     except Exception as e:
-                        print(e)
+                        self.logger.error(e)
             except Exception as e:
-                print(e)
-            print("============Next Page==============")
+                self.logger.error(e)
+            self.logger.info("============Next Page==============")
 
     def endorse(self,
               profile_link,
@@ -553,13 +553,13 @@ class LinkedinPy:
                                     ceil(sleep_delay * 1.14))
                         sleep(delay_random)
                     else:
-                        print('button_type already', button_type)
+                        self.logger.info('button_type already {}'.format(button_type))
                 except Exception as e:
-                    print(e)
+                    self.logger.error(e)
             else:
-                print('Skill & Endorsements pane not found')
+                self.logger.info('Skill & Endorsements pane not found')
         except Exception as e:
-            print(e)
+            self.logger.error(e)
 
     def search_and_endorse(self,
               query,
@@ -591,7 +591,7 @@ class LinkedinPy:
                 st = random.randint(1, 3)
                 temp_search_url = search_url + "&page=" + str(st)
                 web_address_navigator(Settings,self.browser, temp_search_url)
-                print("Testing page:", st)
+                self.logger.info("Testing page:".format(st))
                 result_items = self.browser.find_elements_by_css_selector("div.search-result__wrapper")
                 if len(result_items) > 0:
                     break
@@ -606,7 +606,7 @@ class LinkedinPy:
                 temp_search_url = search_url + "&page=" + str(page_no)
                 if page_no > st and st > 1:
 	                web_address_navigator(Settings,self.browser, temp_search_url)
-                print("Starting page:", page_no)
+                self.logger.info("Starting page: {}".format(page_no))
 
                 for jc in range(2, 11):
                     sleep(1)
@@ -618,24 +618,24 @@ class LinkedinPy:
                 for result_item in result_items:
                     try:
                         link = result_item.find_element_by_css_selector("div > a")
-                        print("Profile : {}".format(link.get_attribute("href")))
+                        self.logger.info("Profile : {}".format(link.get_attribute("href")))
                         collected_profile_links.append(link.get_attribute("href"))
                         name = result_item.find_element_by_css_selector("h3 > span > span > span")
-                        print("Name : {}".format(name.text))
+                        self.logger.info("Name : {}".format(name.text))
                     except Exception as e:
-                        print(e)
+                        self.logger.error(e)
             except Exception as e:
-                print(e)
+                self.logger.error(e)
 
             for collected_profile_link in collected_profile_links:
                 self.endorse(collected_profile_link, sleep_delay=sleep_delay)
                 connects = connects + 1
                 if connects >= max_endorsements:
-                    print("max_endorsements({}) for this iteration reached , Returning...".format(max_endorsements))
+                    self.logger.info("max_endorsements({}) for this iteration reached , Returning...".format(max_endorsements))
                     return
 
 
-            print("============Next Page==============")
+            self.logger.info("============Next Page==============")
 
 
     def dump_connect_restriction(self, profile_name, logger, logfolder):
@@ -880,7 +880,7 @@ def smart_run(session):
         if session.login():
             yield
         else:
-            print("Not proceeding as login failed")
+            self.logger.info("Not proceeding as login failed")
 
     except (Exception, KeyboardInterrupt) as exc:
         if isinstance(exc, NoSuchElementException):

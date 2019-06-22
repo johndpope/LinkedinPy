@@ -10,7 +10,6 @@ PyVirtualDisplay == 0.2.1
 # linkedinpy/login_util.py: 8
 # linkedinpy/util.py: 31,32,34
 # quickstart.py: 6
-SocialCommons == 0.1.dev0
 
 # linkedinpy/linkedinpy.py: 18,62
 # linkedinpy/login_util.py: 5
