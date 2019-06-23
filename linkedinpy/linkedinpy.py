@@ -6,49 +6,33 @@ import random
 from sys import platform
 from platform import python_version
 import os
-# import csv
 import json
-# import requests
 import sqlite3
 
 import pprint as pp
 
-# from selenium import webdriver
-# from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.action_chains import ActionChains
-# from selenium.webdriver.common.by import By
 
 from pyvirtualdisplay import Display
 import logging
 from contextlib import contextmanager
 from copy import deepcopy
-# import unicodedata
 from sys import exit as clean_exit
 from tempfile import gettempdir
 
-# import LinkedinPy modules
-# from socialcommons.clarifai_util import check_image
 from .login_util import login_user
-# from .print_log_writer import log_connecter_num
-# from .print_log_writer import log_connecting_num
 
 from socialcommons.time_util import sleep
-# from socialcommons.time_util import set_sleep_percentage
 
 from .util import update_activity
-# from .util import get_active_users
-# from .util import validate_username
 from .util import web_address_navigator
 from .util import interruption_handler
 from .util import highlight_print
-# from .util import dump_record_activity
 from .util import truncate_float
 from .util import save_account_progress
 from .util import parse_cli_args
 
 from .database_engine import get_database
-# from socialcommons.text_analytics import text_analysis
-# from socialcommons.text_analytics import yandex_supported_languages
 from socialcommons.browser import set_selenium_local_session
 from socialcommons.browser import close_browser
 from socialcommons.file_manager import get_workspace
@@ -368,6 +352,12 @@ class LinkedinPy:
                 self.logger.error(e)
             self.logger.info("============Next Page==============")
 
+    def test_page(self, search_url, page_no):
+        web_address_navigator(Settings,self.browser, search_url)
+        self.logger.info("Testing page: {}".format(page_no))
+        if len(self.browser.find_elements_by_css_selector("div.search-result__wrapper")) > 0:
+            return True
+        return False
 
     def search_and_connect(self,
               query,
@@ -382,7 +372,7 @@ class LinkedinPy:
         """ search linkedin and connect from a given profile """
 
         if quota_supervisor(Settings, "connects") == "jump":
-            return #False, "jumped"
+            return 0
 
         self.logger.info("Searching for: query={}, connection_relationship_code={}, city_code={}, school_code={}".format(query, connection_relationship_code, city_code, school_code))
         connects = 0
@@ -400,15 +390,19 @@ class LinkedinPy:
         search_url = search_url + "&keywords=" + query
         search_url = search_url + "&origin=" + "FACETED_SEARCH"
 
+
+        temp_search_url = search_url + "&page=1"
+        if self.test_page(temp_search_url=temp_search_url, page_no=1)==False:
+            self.logger.info("============Definitely no Result, Next Query==============")
+            return 0
+
         if random_start:
             trial = 0
-            st = 10
+            st = 5
             while True and trial < 5 and st > 1:
                 st = random.randint(1, st-1)
                 temp_search_url = search_url + "&page=" + str(st)
-                web_address_navigator(Settings,self.browser, temp_search_url)
-                self.logger.info("Testing page: {}".format(st))
-                if len(self.browser.find_elements_by_css_selector("div.search-result__wrapper")) > 0:
+                if self.test_page(temp_search_url):
                     break
                 trial = trial + 1
         else:
@@ -438,12 +432,12 @@ class LinkedinPy:
                 for i in range(0, len(self.browser.find_elements_by_css_selector("div.search-result__wrapper"))):
                     try:
                         res_item = self.browser.find_elements_by_css_selector("li.search-result div.search-entity div.search-result__wrapper")[i]# div.search-result__actions div button")
-                        pp.pprint(res_item.get_attribute('innerHTML'))
+                        # pp.pprint(res_item.get_attribute('innerHTML'))
                         link = res_item.find_element_by_css_selector("div > a")
                         profile_link = link.get_attribute("href")
                         self.logger.info("Profile : {}".format(profile_link))
                         user_name = profile_link.split('/')[4]
-                        self.logger.info("user_name : {}".format(user_name))
+                        # self.logger.info("user_name : {}".format(user_name))
                         name = res_item.find_element_by_css_selector("h3 > span > span > span")#//span/span/span[1]")
                         self.logger.info("Name : {}".format(name.text))
 
@@ -527,6 +521,7 @@ class LinkedinPy:
             except Exception as e:
                 self.logger.error(e)
             self.logger.info("============Next Page==============")
+            return connects
 
     def endorse(self,
               profile_link,
